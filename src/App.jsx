@@ -1,3 +1,4 @@
+import Biblia from './pages/Biblia'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav.jsx'
 import Home from './pages/Home.jsx'
@@ -22,6 +23,7 @@ export default function App() {
   return (
     <>
       <Routes>
+        <Route path="/biblia" element={<Biblia />} />
         <Route path="/" element={<Home />} />
         <Route path="/biblia" element={<BiblePage />} />
         <Route path="/agenda" element={<Agenda />} />
