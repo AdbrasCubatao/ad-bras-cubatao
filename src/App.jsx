@@ -9,7 +9,7 @@ import Quiz from './pages/Quiz.jsx'
 import Announcements from './pages/Announcements.jsx'
 import Agenda from './pages/Agenda.jsx'
 import {
-  BiblePage, CultosPage, StudiesPage, WorshipPage,
+  CultosPage, StudiesPage, WorshipPage,
   LocationPage, TithesPage, ContactsPage, MorePage,
 } from './pages/StaticPages.jsx'
 import Login from './pages/admin/Login.jsx'
@@ -23,9 +23,8 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/biblia" element={<Biblia />} />
         <Route path="/" element={<Home />} />
-        <Route path="/biblia" element={<BiblePage />} />
+        <Route path="/biblia" element={<Biblia />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/cultos" element={<CultosPage />} />
         <Route path="/avisos" element={<Announcements />} />
