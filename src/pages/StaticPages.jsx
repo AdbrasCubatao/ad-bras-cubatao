@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SimplePage from './SimplePage.jsx'
 import { CHURCH } from '../lib/churchConfig.js'
@@ -5,12 +6,35 @@ import { useSiteSettings } from '../lib/useSiteSettings.js'
 import { QuizIcon, PeopleIcon, MusicIcon, PinIcon, HeartHandIcon, PhoneIcon, BibleIcon, PlayBoxIcon, StudyIcon } from '../components/icons.jsx'
 
 export function BiblePage() {
+  const abrirBiblia = () => {
+    const appUrl = 'youversion://'
+    const webUrl = 'https://www.bibliaonline.com.br/arc'
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+    if (isMobile) {
+      window.location.href = appUrl
+      setTimeout(() => {
+        window.open(webUrl, '_blank', 'noopener,noreferrer')
+      }, 1500)
+    } else {
+      window.open(webUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   return (
     <SimplePage title="Bíblia" subtitle="Leitura da Palavra">
-      <p className="comment-text">
-        Em breve: leitor de Bíblia completo dentro do app. Por enquanto, você pode ler
-        pelo app da Bíblia Online ou pela versão impressa. 📖
-      </p>
+      <div style={{ textAlign: 'center', padding: '16px 0' }}>
+        <p className="comment-text" style={{ marginBottom: '20px' }}>
+          Acesse a Bíblia Sagrada (ARC) no seu aplicativo instalado ou pelo navegador.
+        </p>
+        <button
+          onClick={abrirBiblia}
+          className="btn-primary"
+          style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: 'bold' }}
+        >
+          📖 Abrir Bíblia
+        </button>
+      </div>
     </SimplePage>
   )
 }
@@ -70,15 +94,14 @@ export function LocationPage() {
 }
 
 export function TithesPage() {
-export function TithesPage() {
-  const [copiado, setCopiado] = React.useState(false);
-  const chavePix = '50.317.711/0001-62';
+  const [copiado, setCopiado] = useState(false)
+  const chavePix = '50.317.711/0001-62'
 
   const copiarPix = () => {
-    navigator.clipboard.writeText(chavePix);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 3000);
-  };
+    navigator.clipboard.writeText(chavePix)
+    setCopiado(true)
+    setTimeout(() => setCopiado(false), 3000)
+  }
 
   return (
     <div style={{ padding: '24px 16px', fontFamily: 'sans-serif', maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
@@ -142,10 +165,8 @@ export function TithesPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
-
-
 
 export function ContactsPage() {
   const { settings } = useSiteSettings()
