@@ -12,6 +12,7 @@ export default function Departments() {
       subtitulo: 'Departamento de Jovens',
       icone: '🔥',
       lider: 'Liderança UJADEMC',
+      fotoLider: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 1,
@@ -30,6 +31,7 @@ export default function Departments() {
       subtitulo: 'Departamento de Adolescentes',
       icone: '⚡',
       lider: 'Liderança Geração Teen',
+      fotoLider: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 2,
@@ -48,6 +50,7 @@ export default function Departments() {
       subtitulo: 'Departamento de Mulheres',
       icone: '🌸',
       lider: 'Liderança CIBEC',
+      fotoLider: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 3,
@@ -66,6 +69,7 @@ export default function Departments() {
       subtitulo: 'Departamento de Homens',
       icone: '🛡️',
       lider: 'Liderança UNIVADEM',
+      fotoLider: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 4,
@@ -84,6 +88,7 @@ export default function Departments() {
       subtitulo: 'Departamento Infantil',
       icone: '🎨',
       lider: 'Liderança MINIDEMC',
+      fotoLider: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 5,
@@ -102,6 +107,7 @@ export default function Departments() {
       subtitulo: 'Departamento dos Diáconos',
       icone: '🤝',
       lider: 'Corpo Diaconal',
+      fotoLider: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
       posts: [
         {
           id: 6,
@@ -121,12 +127,39 @@ export default function Departments() {
     window.open(`https://wa.me/5513999999999?text=${mensagem}`, '_blank')
   }
 
-  // --- TELA 2: DETALHES DO DEPARTAMENTO (LAYOUT FEED) ---
+  // --- TELA 2: PÁGINA DO DEPARTAMENTO SELECIONADO ---
   if (depSelecionado) {
     const postsFiltrados = depSelecionado.posts.filter(p => abaAtiva === 'todos' || p.categoria === abaAtiva)
 
+    // Título customizado com foto do líder ao lado
+    const TituloComFoto = (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <img
+          src={depSelecionado.fotoLider}
+          alt={depSelecionado.lider}
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            border: '2px solid #0a192f',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+          }}
+        />
+        <div>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0, color: '#0a192f' }}>
+            {depSelecionado.nome}
+          </h1>
+          <p style={{ fontSize: '12px', color: '#718096', margin: 0 }}>
+            {depSelecionado.subtitulo}
+          </p>
+        </div>
+      </div>
+    )
+
     return (
-      <SimplePage title={depSelecionado.nome} subtitle={depSelecionado.subtitulo}>
+      <SimplePage customTitle={TituloComFoto}>
+        {/* Botão de Voltar */}
         <button
           onClick={() => { setDepSelecionado(null); setAbaAtiva('avisos'); }}
           style={{
@@ -288,4 +321,4 @@ export default function Departments() {
       </div>
     </SimplePage>
   )
-                  }
+            }
