@@ -63,12 +63,74 @@ export function StudiesPage() {
 }
 
 export function WorshipPage() {
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // URL do stream oficial da Rádio AD Brás Cubatão
+  const radioStreamUrl = "https://radioadbrascubatao.abcast.net/stream"
+
+  const toggleRadio = () => {
+    const audioElement = document.getElementById('radio-player')
+    if (isPlaying) {
+      audioElement.pause()
+      setIsPlaying(false)
+    } else {
+      audioElement.play().catch(() => {
+        alert("Não foi possível iniciar a transmissão ao vivo no momento.")
+      })
+      setIsPlaying(true)
+    }
+  }
+
   return (
-    <SimplePage title="Louvores" subtitle="Playlist e letras dos louvores da igreja">
-      <p className="comment-text">Em breve: playlist do ministério de louvor.</p>
+    <SimplePage title="Louvores" subtitle="Rádio Web & Louvores 24h">
+      <div style={{ textAlign: 'center', padding: '16px 0' }}>
+        <div style={{ 
+          backgroundColor: '#0a192f', 
+          color: '#fff', 
+          borderRadius: '20px', 
+          padding: '24px 16px',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+          marginBottom: '20px'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>📻</div>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 4px 0', color: '#fff' }}>
+            Rádio AD Brás Cubatão
+          </h3>
+          <p style={{ fontSize: '13px', color: '#a0aec0', marginBottom: '20px' }}>
+            {isPlaying ? '🔴 Tocando ao vivo...' : 'Sintonize a rádio da nossa igreja'}
+          </p>
+
+          <audio id="radio-player" src={radioStreamUrl} preload="none" />
+
+          <button
+            onClick={toggleRadio}
+            style={{
+              backgroundColor: isPlaying ? '#dc3545' : '#10b981',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '14px 28px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+            }}
+          >
+            {isPlaying ? '⏸ Pausar' : '▶ Ouvir Rádio Ao Vivo'}
+          </button>
+        </div>
+
+        <p className="comment-text" style={{ fontSize: '12px', color: '#666' }}>
+          Transmissão 24 horas de louvores, mensagens e programação da Baixada Santista.
+        </p>
+      </div>
     </SimplePage>
   )
 }
+
 
 export function LocationPage() {
   const { settings, loading } = useSiteSettings()
