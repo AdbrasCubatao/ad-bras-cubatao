@@ -70,6 +70,7 @@ export function LocationPage() {
 }
 
 export function TithesPage() {
+export function TithesPage() {
   const [copiado, setCopiado] = React.useState(false);
   const chavePix = '50.317.711/0001-62';
 
@@ -88,6 +89,7 @@ export function TithesPage() {
         <strong style={{ color: '#333' }}>2 Coríntios 9:7</strong>
       </p>
 
+      {/* Card Principal - PIX */}
       <div style={{ 
         backgroundColor: '#f8f9fa', 
         border: '1px solid #e9ecef', 
@@ -130,6 +132,7 @@ export function TithesPage() {
         </button>
       </div>
 
+      {/* Card Secundário - Dados da Conta */}
       <div style={{ border: '1px solid #eee', borderRadius: '16px', padding: '16px', textAlign: 'left', backgroundColor: '#fff' }}>
         <h4 style={{ color: '#333', marginTop: 0, marginBottom: '12px', fontSize: '15px' }}>Dados da Conta</h4>
         <div style={{ color: '#555', fontSize: '14px', lineHeight: '1.6' }}>
@@ -141,6 +144,7 @@ export function TithesPage() {
     </div>
   );
 }
+
 
 
 export function ContactsPage() {
