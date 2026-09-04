@@ -1,3 +1,4 @@
+import Dizimos from './pages/Dizimos'
 import Biblia from './pages/Biblia'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav.jsx'
@@ -34,7 +35,7 @@ export default function App() {
         <Route path="/departamentos" element={<Departments />} />
         <Route path="/departamentos/:slug" element={<DepartmentDetail />} />
         <Route path="/localizacao" element={<LocationPage />} />
-        <Route path="/dizimos" element={<TithesPage />} />
+        <Route path="/dizimos" element={<Dizimos />} />
         <Route path="/contatos" element={<ContactsPage />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/mais" element={<MorePage />} />
