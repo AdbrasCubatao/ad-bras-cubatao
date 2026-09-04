@@ -63,22 +63,11 @@ export function StudiesPage() {
 }
 
 export function WorshipPage() {
-  const [isPlaying, setIsPlaying] = useState(false)
+export function WorshipPage() {
+  const radioWebPage = "https://radioadbrascubatao.abcast.net/"
 
-  // URL do stream oficial da Rádio AD Brás Cubatão
-  const radioStreamUrl = "https://radioadbrascubatao.abcast.net/stream"
-
-  const toggleRadio = () => {
-    const audioElement = document.getElementById('radio-player')
-    if (isPlaying) {
-      audioElement.pause()
-      setIsPlaying(false)
-    } else {
-      audioElement.play().catch(() => {
-        alert("Não foi possível iniciar a transmissão ao vivo no momento.")
-      })
-      setIsPlaying(true)
-    }
+  const abrirRadio = () => {
+    window.open(radioWebPage, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -97,39 +86,35 @@ export function WorshipPage() {
             Rádio AD Brás Cubatão
           </h3>
           <p style={{ fontSize: '13px', color: '#a0aec0', marginBottom: '20px' }}>
-            {isPlaying ? '🔴 Tocando ao vivo...' : 'Sintonize a rádio da nossa igreja'}
+            Transmissão de louvores e palavras 24h
           </p>
 
-          <audio id="radio-player" src={radioStreamUrl} preload="none" />
-
           <button
-            onClick={toggleRadio}
+            onClick={abrirRadio}
+            className="btn-primary btn-gold"
             style={{
-              backgroundColor: isPlaying ? '#dc3545' : '#10b981',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '14px 28px',
+              width: '100%',
+              padding: '14px',
               fontSize: '16px',
               fontWeight: 'bold',
-              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              justifyContent: 'center',
+              gap: '8px'
             }}
           >
-            {isPlaying ? '⏸ Pausar' : '▶ Ouvir Rádio Ao Vivo'}
+            ▶ Sintonizar Rádio Ao Vivo
           </button>
         </div>
 
         <p className="comment-text" style={{ fontSize: '12px', color: '#666' }}>
-          Transmissão 24 horas de louvores, mensagens e programação da Baixada Santista.
+          Toque no botão para abrir a transmissão oficial da nossa igreja no seu navegador.
         </p>
       </div>
     </SimplePage>
   )
 }
+
 
 
 export function LocationPage() {
