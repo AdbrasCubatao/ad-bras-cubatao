@@ -63,7 +63,6 @@ export function StudiesPage() {
 }
 
 export function WorshipPage() {
-export function WorshipPage() {
   const radioWebPage = "https://radioadbrascubatao.abcast.net/"
 
   const abrirRadio = () => {
