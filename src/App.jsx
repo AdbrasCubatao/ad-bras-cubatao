@@ -1,4 +1,6 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import Study from './pages/Study'
+import AdminStudies from './pages/AdminStudies'
+  import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav.jsx'
 import Home from './pages/Home.jsx'
 import Prayer from './pages/Prayer.jsx'
@@ -22,6 +24,9 @@ export default function App() {
   return (
     <>
       <Routes>
+        <Route path="/estudos" element={<Study />} />
+<Route path="/admin/estudos" element={<AdminStudies />} />
+        
         <Route path="/" element={<Home />} />
         <Route path="/biblia" element={<BiblePage />} />
         <Route path="/agenda" element={<Agenda />} />
