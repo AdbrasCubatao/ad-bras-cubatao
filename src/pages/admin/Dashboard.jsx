@@ -250,6 +250,28 @@ export default function Dashboard() {
                 alignItems: 'center'
               }}
             >
+              {/* Adicione este bloco dentro do grid de atalhos do Dashboard */}
+<div 
+  onClick={() => navigate('/admin/estudos')}
+  style={{
+    backgroundColor: '#ffffff',
+    padding: '20px',
+    borderRadius: '16px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    cursor: 'pointer',
+    border: '1px solid #edf2f7',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  }}
+>
+  <span style={{ fontSize: '24px' }}>📚</span>
+  <div>
+    <h3 style={{ margin: 0, fontSize: '16px', color: '#1a202c' }}>Gerenciar Estudos / EBD</h3>
+    <small style={{ color: '#718096' }}>Cadastrar apostilas, lições e PDFs</small>
+  </div>
+</div>
+
               <div>
                 <div style={{ fontSize: '11px', color: '#3182ce', fontWeight: 'bold' }}>
                   {ev.day} • {ev.time}
