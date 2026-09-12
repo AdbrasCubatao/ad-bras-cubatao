@@ -1,3 +1,10 @@
+import Study from './Study.jsx'
+
+// Substitua a antiga export de StudiesPage por esta:
+export function StudiesPage() {
+  return <Study />
+}
+
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SimplePage from './SimplePage.jsx'
