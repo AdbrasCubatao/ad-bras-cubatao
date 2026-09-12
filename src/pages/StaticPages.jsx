@@ -1,16 +1,15 @@
-import Study from './Study.jsx'
-
-// Substitua a antiga export de StudiesPage por esta:
-export function StudiesPage() {
-  return <Study />
-}
-
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SimplePage from './SimplePage.jsx'
+import Study from './Study.jsx'
 import { CHURCH } from '../lib/churchConfig.js'
 import { useSiteSettings } from '../lib/useSiteSettings.js'
 import { QuizIcon, PeopleIcon, MusicIcon, PinIcon, HeartHandIcon, PhoneIcon, BibleIcon, PlayBoxIcon, StudyIcon } from '../components/icons.jsx'
+
+// Exporta o novo componente dinâmico integrado ao Supabase
+export function StudiesPage() {
+  return <Study />
+}
 
 export function BiblePage() {
   const abrirBiblia = () => {
@@ -57,14 +56,6 @@ export function CultosPage() {
       <a href={youtube} target="_blank" rel="noreferrer" className="btn-primary btn-gold" style={{ display: 'block', textAlign: 'center' }}>
         Assistir no YouTube
       </a>
-    </SimplePage>
-  )
-}
-
-export function StudiesPage() {
-  return (
-    <SimplePage title="Estudos / EBD" subtitle="Materiais da Escola Bíblica Dominical">
-      <p className="comment-text">Em breve: materiais de estudo para download, direto aqui no app.</p>
     </SimplePage>
   )
 }
@@ -120,8 +111,6 @@ export function WorshipPage() {
     </SimplePage>
   )
 }
-
-
 
 export function LocationPage() {
   const { settings, loading } = useSiteSettings()
@@ -253,5 +242,4 @@ export function MorePage() {
       </div>
     </SimplePage>
   )
-        }
-    
+}
