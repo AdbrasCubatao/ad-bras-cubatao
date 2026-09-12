@@ -50,3 +50,5 @@ export default function App() {
     </>
   )
 }
+git commit -m "Atualiza layout da tela de estudos"
+
