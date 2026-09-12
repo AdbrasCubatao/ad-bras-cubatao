@@ -1,3 +1,8 @@
+import { useNavigate } from 'react-router-dom'
+
+// No evento de clique do botão Estudos/EBD:
+const navigate = useNavigate()
+onClick={() => navigate('/estudos')}
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient.js'
 
