@@ -1,6 +1,5 @@
-import Study from './pages/Study'
-import AdminStudies from './pages/AdminStudies'
-  import { Routes, Route, useLocation } from 'react-router-dom'
+import React from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import BottomNav from './components/BottomNav.jsx'
 import Home from './pages/Home.jsx'
 import Prayer from './pages/Prayer.jsx'
@@ -9,8 +8,10 @@ import DepartmentDetail from './pages/DepartmentDetail.jsx'
 import Quiz from './pages/Quiz.jsx'
 import Announcements from './pages/Announcements.jsx'
 import Agenda from './pages/Agenda.jsx'
+import Study from './pages/Study.jsx'
+import AdminStudies from './pages/AdminStudies.jsx'
 import {
-  BiblePage, CultosPage, StudiesPage, WorshipPage,
+  BiblePage, CultosPage, WorshipPage,
   LocationPage, TithesPage, ContactsPage, MorePage,
 } from './pages/StaticPages.jsx'
 import Login from './pages/admin/Login.jsx'
@@ -24,16 +25,13 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/estudos" element={<Study />} />
-<Route path="/admin/estudos" element={<AdminStudies />} />
-        
         <Route path="/" element={<Home />} />
         <Route path="/biblia" element={<BiblePage />} />
         <Route path="/agenda" element={<Agenda />} />
         <Route path="/cultos" element={<CultosPage />} />
         <Route path="/avisos" element={<Announcements />} />
         <Route path="/oracao" element={<Prayer />} />
-        <Route path="/estudos" element={<StudiesPage />} />
+        <Route path="/estudos" element={<Study />} />
         <Route path="/louvores" element={<WorshipPage />} />
         <Route path="/departamentos" element={<Departments />} />
         <Route path="/departamentos/:slug" element={<DepartmentDetail />} />
@@ -43,8 +41,10 @@ export default function App() {
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/mais" element={<MorePage />} />
 
+        {/* Rotas de Administração */}
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/admin/estudos" element={<ProtectedRoute><AdminStudies /></ProtectedRoute>} />
       </Routes>
       {!isAdmin && <BottomNav />}
     </>
