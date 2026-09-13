@@ -1,139 +1,166 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient.js'
+import { supabase } from '../supabaseClient' // Ajuste o caminho se necessário
 
 export default function AdminStudies() {
   const [studies, setStudies] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
     title: '',
-    category: 'EBD',
+    category: 'EBD - Adultos',
+    description: '',
     cover_url: '',
-    file_url: '',
-    description: ''
+    file_url: ''
   })
-
-  const fetchStudies = async () => {
-    const { data, error } = await supabase
-      .from('studies')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (!error && data) setStudies(data)
-  }
 
   useEffect(() => {
     fetchStudies()
   }, [])
 
+  const fetchStudies = async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('studies')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setStudies(data || [])
+    } catch (err) {
+      alert('Erro ao carregar estudos: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.title || !formData.file_url) return alert('Preencha os campos obrigatórios!')
+    try {
+      const { error } = await supabase.from('studies').insert([
+        {
+          title: formData.title,
+          category: formData.category,
+          description: formData.description,
+          cover_url: formData.cover_url,
+          file_url: formData.file_url,
+          downloads_count: 0
+        }
+      ])
 
-    setLoading(true)
-    const { error } = await supabase
-      .from('studies')
-      .insert([formData])
+      if (error) throw error
 
-    setLoading(false)
-
-    if (error) {
-      alert('Erro ao cadastrar estudo: ' + error.message)
-    } else {
-      setFormData({ title: '', category: 'EBD', cover_url: '', file_url: '', description: '' })
       alert('Estudo cadastrado com sucesso!')
+      setFormData({ title: '', category: 'EBD - Adultos', description: '', cover_url: '', file_url: '' })
       fetchStudies()
+    } catch (err) {
+      alert('Erro ao salvar estudo: ' + err.message)
     }
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm('Deseja excluir este estudo?')) {
+    if (!window.confirm('Tem certeza que deseja excluir este estudo?')) return
+    try {
       const { error } = await supabase.from('studies').delete().eq('id', id)
-      if (error) {
-        alert('Erro ao excluir: ' + error.message)
-      } else {
-        fetchStudies()
-      }
+      if (error) throw error
+      fetchStudies()
+    } catch (err) {
+      alert('Erro ao excluir: ' + err.message)
     }
   }
 
   return (
-    <div style={{ padding: '16px', maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h2 style={{ color: '#0f172a', marginBottom: '16px' }}>📖 Gerenciar Estudos & EBD</h2>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h2>Painel do Administrador - Estudos & EBD</h2>
 
       {/* Formulário de Cadastro */}
-      <form onSubmit={handleSubmit} style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '12px', display: 'grid', gap: '10px', marginBottom: '24px', border: '1px solid #e2e8f0' }}>
-        <input
-          type="text"
-          placeholder="Título do Estudo (Ex: Lição 1 - Fé)"
-          value={formData.title}
-          onChange={e => setFormData({ ...formData, title: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-          required
-        />
+      <form onSubmit={handleSubmit} style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
+        <h3>Cadastrar Novo Estudo</h3>
         
-        <select
-          value={formData.category}
-          onChange={e => setFormData({ ...formData, category: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-        >
-          <option value="EBD">EBD</option>
-          <option value="Ensino">Ensino</option>
-          <option value="Discipulado">Discipulado</option>
-          <option value="Geral">Geral</option>
-        </select>
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>Título do Estudo:</label>
+          <input
+            type="text"
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          />
+        </div>
 
-        <input
-          type="url"
-          placeholder="URL da Foto de Capa (Link da imagem)"
-          value={formData.cover_url}
-          onChange={e => setFormData({ ...formData, cover_url: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-        />
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>Categoria:</label>
+          <select
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          >
+            <option value="EBD - Adultos">EBD - Adultos</option>
+            <option value="EBD - Jovens">EBD - Jovens</option>
+            <option value="EBD - Crianças">EBD - Crianças</option>
+            <option value="Doutrina">Doutrina</option>
+            <option value="Sermões">Sermões</option>
+          </select>
+        </div>
 
-        <input
-          type="url"
-          placeholder="Link do PDF/Material (Google Drive, Supabase Storage, etc)"
-          value={formData.file_url}
-          onChange={e => setFormData({ ...formData, file_url: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-          required
-        />
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>Breve Citação / Resumo:</label>
+          <textarea
+            rows="3"
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          />
+        </div>
 
-        <textarea
-          placeholder="Breve descrição ou resumo do conteúdo..."
-          value={formData.description}
-          onChange={e => setFormData({ ...formData, description: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', height: '60px' }}
-        />
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>URL da Imagem de Capa (Foto/Card):</label>
+          <input
+            type="url"
+            placeholder="https://..."
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            value={formData.cover_url}
+            onChange={(e) => setFormData({ ...formData, cover_url: e.target.value })}
+          />
+        </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          style={{ backgroundColor: '#10b981', color: '#fff', padding: '12px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
-        >
-          {loading ? 'Salvando...' : '➕ Cadastrar Novo Estudo'}
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold' }}>Link do Material (PDF / Google Drive):</label>
+          <input
+            type="url"
+            required
+            placeholder="https://..."
+            style={{ width: '100%', padding: '8px', marginTop: '4px' }}
+            value={formData.file_url}
+            onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+          />
+        </div>
+
+        <button type="submit" style={{ padding: '10px 20px', background: '#0070f3', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          Salvar e Publicar
         </button>
       </form>
 
-      {/* Lista de Publicações no Painel */}
-      <h3 style={{ fontSize: '16px', color: '#0f172a' }}>Materiais Publicados</h3>
-      <div style={{ display: 'grid', gap: '10px' }}>
-        {studies.length === 0 ? (
-          <p style={{ color: '#64748b', fontSize: '14px' }}>Nenhum estudo cadastrado ainda.</p>
-        ) : (
-          studies.map(item => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '8px' }}>
-              <div>
-                <strong style={{ fontSize: '14px', display: 'block', color: '#0f172a' }}>{item.title}</strong>
-                <small style={{ color: '#64748b' }}>📥 {item.downloads_count || 0} downloads • {item.category}</small>
+      {/* Lista de Estudos Cadastrados */}
+      <h3>Estudos Publicados</h3>
+      {loading ? <p>Carregando...</p> : (
+        <div style={{ display: 'grid', gap: '15px' }}>
+          {studies.map((item) => (
+            <div key={item.id} style={{ display: 'flex', border: '1px solid #ddd', padding: '15px', borderRadius: '6px', alignItems: 'center', gap: '15px' }}>
+              {item.cover_url && (
+                <img src={item.cover_url} alt={item.title} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+              )}
+              <div style={{ flex: 1 }}>
+                <h4 style={{ margin: '0 0 5px 0' }}>{item.title} <small style={{ color: '#666', fontWeight: 'normal' }}>({item.category})</small></h4>
+                <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#444' }}>{item.description}</p>
+                <small style={{ color: '#0070f3' }}>📥 Downloads: <strong>{item.downloads_count || 0}</strong></small>
               </div>
-              <button onClick={() => handleDelete(item.id)} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>
+              <button onClick={() => handleDelete(item.id)} style={{ background: '#ff4d4d', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}>
                 Excluir
               </button>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
-                  }
+}
