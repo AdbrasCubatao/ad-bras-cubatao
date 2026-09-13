@@ -13,10 +13,10 @@ import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
-// Páginas Administrativas
-import AdminLogin from './pages/admin/Login.jsx'
-import Dashboard from './pages/admin/Dashboard.jsx'
-
+// Páginas Administrativas (Ajustadas para a pasta src/pages/)
+import AdminLogin from './pages/AdminLogin.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import AdminAgenda from './pages/AdminAgenda.jsx'
 import AdminStudies from './pages/AdminStudies.jsx'
 
 export default function App() {
@@ -38,7 +38,7 @@ export default function App() {
         {/* Rotas Administrativas */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<Dashboard />} />
-        
+        <Route path="/admin/agenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
       </Routes>
     </Router>
