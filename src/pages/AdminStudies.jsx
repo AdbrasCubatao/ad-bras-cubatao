@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../supabaseClient' // Ajuste o caminho se necessário
+import { supabase } from '../lib/supabaseClient.js'
+
 
 export default function AdminStudies() {
   const [studies, setStudies] = useState([])
