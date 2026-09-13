@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-// Páginas Públicas
+// Páginas Públicas (em src/pages/)
 import Home from './pages/Home.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Study from './pages/Study.jsx'
@@ -13,11 +13,11 @@ import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
-// Páginas Administrativas (Todas na pasta src/pages/)
-import AdminLogin from './pages/AdminLogin.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import AdminAgenda from './pages/AdminAgenda.jsx'
-import AdminStudies from './pages/AdminStudies.jsx'
+// Páginas Administrativas (em src/pages/admin/)
+import AdminLogin from './pages/admin/AdminLogin.jsx'
+import Dashboard from './pages/admin/Dashboard.jsx'
+import AdminAgenda from './pages/admin/AdminAgenda.jsx'
+import AdminStudies from './pages/admin/AdminStudies.jsx'
 
 export default function App() {
   return (
