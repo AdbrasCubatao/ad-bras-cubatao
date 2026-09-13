@@ -25,21 +25,15 @@ export default function Study() {
     }
   }
 
-  // Incrementa o contador de downloads
   const handleDownload = async (id, currentCount, fileUrl) => {
     try {
       const newCount = (currentCount || 0) + 1
-      
-      // Atualiza o banco
       await supabase
         .from('studies')
         .update({ downloads_count: newCount })
         .eq('id', id)
 
-      // Atualiza a tela localmente
       setStudies(studies.map(s => s.id === id ? { ...s, downloads_count: newCount } : s))
-
-      // Abre o arquivo em nova aba
       window.open(fileUrl, '_blank')
     } catch (err) {
       console.error('Erro ao registrar download:', err)
@@ -90,4 +84,4 @@ export default function Study() {
       )}
     </div>
   )
-                  }
+}
