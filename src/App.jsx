@@ -16,7 +16,7 @@ import Quiz from './pages/Quiz.jsx'
 // Páginas Administrativas
 import AdminLogin from './pages/admin/Login.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
-import AdminAgenda from './pages/admin/AdminAgenda.jsx'
+
 import AdminStudies from './pages/AdminStudies.jsx'
 
 export default function App() {
@@ -38,7 +38,7 @@ export default function App() {
         {/* Rotas Administrativas */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<Dashboard />} />
-        <Route path="/admin/agenda" element={<AdminAgenda />} />
+        
         <Route path="/admin/estudos" element={<AdminStudies />} />
       </Routes>
     </Router>
