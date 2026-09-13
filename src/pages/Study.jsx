@@ -1,159 +1,93 @@
 import React, { useState, useEffect } from 'react'
-import SimplePage from './SimplePage.jsx'
-import { supabase } from '../services/supabase'
+import { supabase } from '../supabaseClient'
 
 export default function Study() {
-  const [estudos, setEstudos] = useState([])
+  const [studies, setStudies] = useState([])
   const [loading, setLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
-    async function fetchEstudos() {
-      try {
-        setLoading(true)
-        const { data, error } = await supabase
-          .from('estudos')
-          .select('*')
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          console.error('Erro ao buscar estudos no Supabase:', error)
-          setErrorMessage(error.message)
-        } else if (data) {
-          setEstudos(data)
-        }
-      } catch (err) {
-        console.error('Erro inesperado:', err)
-        setErrorMessage('Ocorreu um erro ao conectar ao banco de dados.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchEstudos()
+    fetchStudies()
   }, [])
 
-  const handleDownload = async (id, link) => {
+  const fetchStudies = async () => {
     try {
-      await supabase.rpc('increment_downloads', { row_id: id })
-    } catch (e) {
-      console.log('RPC de increment_downloads não configurado ou erro:', e)
+      const { data, error } = await supabase
+        .from('studies')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setStudies(data || [])
+    } catch (err) {
+      console.error('Erro ao buscar estudos:', err)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    setEstudos(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, downloads: (item.downloads || 0) + 1 } : item
-      )
-    )
+  // Incrementa o contador de downloads
+  const handleDownload = async (id, currentCount, fileUrl) => {
+    try {
+      const newCount = (currentCount || 0) + 1
+      
+      // Atualiza o banco
+      await supabase
+        .from('studies')
+        .update({ downloads_count: newCount })
+        .eq('id', id)
 
-    if (link) {
-      window.open(link, '_blank', 'noopener,noreferrer')
+      // Atualiza a tela localmente
+      setStudies(studies.map(s => s.id === id ? { ...s, downloads_count: newCount } : s))
+
+      // Abre o arquivo em nova aba
+      window.open(fileUrl, '_blank')
+    } catch (err) {
+      console.error('Erro ao registrar download:', err)
+      window.open(fileUrl, '_blank')
     }
   }
 
   return (
-    <SimplePage title="Estudos & EBD" subtitle="Acesse lições, apostilas e materiais de apoio">
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '30px 16px', color: '#64748b' }}>
-          <p style={{ fontSize: '15px' }}>⏳ Carregando materiais de estudo...</p>
-        </div>
-      ) : errorMessage ? (
-        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', color: '#991b1b' }}>
-          <p style={{ fontWeight: 'bold', margin: '0 0 6px 0' }}>Erro ao carregar os estudos</p>
-          <small>{errorMessage}</small>
-        </div>
-      ) : estudos.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '30px 16px', color: '#64748b' }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>📚</div>
-          <p style={{ fontWeight: 'bold', color: '#334155', margin: '0 0 4px 0' }}>Nenhum estudo cadastrado ainda</p>
-          <p style={{ fontSize: '13px', margin: 0 }}>Os novos materiais cadastrados pelo painel aparecerão aqui.</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: '16px', padding: '8px 0' }}>
-          {estudos.map(item => (
-            <div
-              key={item.id}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                overflow: 'hidden',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-              }}
-            >
-              {item.capa && (
-                <img
-                  src={item.capa}
-                  alt={item.titulo}
-                  style={{ width: '100%', height: '180px', objectFit: 'cover' }}
-                />
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Estudos Bíblicos & EBD</h1>
+
+      {loading ? <p style={{ textAlign: 'center' }}>Carregando materiais...</p> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+          {studies.map((item) => (
+            <div key={item.id} style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {item.cover_url ? (
+                <img src={item.cover_url} alt={item.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '180px', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
+                  Sem Imagem
+                </div>
               )}
 
-              <div style={{ padding: '16px' }}>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 'bold',
-                    color: '#0284c7',
-                    backgroundColor: '#e0f2fe',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  {item.categoria || 'Geral'}
-                </span>
-
-                <h3
-                  style={{
-                    fontSize: '17px',
-                    fontWeight: 'bold',
-                    color: '#0f172a',
-                    margin: '10px 0 8px 0',
-                    lineHeight: '1.3'
-                  }}
-                >
-                  {item.titulo}
-                </h3>
-
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    fontSize: '12px',
-                    color: '#64748b',
-                    marginBottom: '16px'
-                  }}
-                >
-                  <span>📥 {item.downloads || 0} downloads</span>
+              <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ fontSize: '12px', background: '#e1f0ff', color: '#0070f3', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold' }}>
+                    {item.category}
+                  </span>
+                  <h3 style={{ margin: '10px 0 8px 0', fontSize: '18px' }}>{item.title}</h3>
+                  <p style={{ fontSize: '14px', color: '#555', marginBottom: '15px' }}>{item.description}</p>
                 </div>
 
-                <button
-                  onClick={() => handleDownload(item.id, item.link)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: '#0284c7',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '12px',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  🔗 Acessar Material / PDF
-                </button>
+                <div style={{ marginTop: 'auto', borderTop: '1px solid #f0f0f0', paddingTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '12px', color: '#777' }}>
+                    📥 <strong>{item.downloads_count || 0}</strong> baixados
+                  </span>
+                  <button
+                    onClick={() => handleDownload(item.id, item.downloads_count, item.file_url)}
+                    style={{ background: '#28a745', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    Baixar Material
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
-    </SimplePage>
+    </div>
   )
-      }
+                  }
