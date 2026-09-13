@@ -14,7 +14,7 @@ import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
 // Páginas Administrativas
-import AdminLogin from './pages/admin/AdminLogin.jsx'
+import AdminLogin from './pages/admin/Login.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminAgenda from './pages/admin/AdminAgenda.jsx'
 import AdminStudies from './pages/AdminStudies.jsx'
