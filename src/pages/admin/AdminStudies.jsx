@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient.js'
+import supabase from '../../lib/supabaseClient.js'
 
 export default function AdminStudies() {
   const [studies, setStudies] = useState([])
@@ -161,4 +161,4 @@ export default function AdminStudies() {
       )}
     </div>
   )
-                                       }
+}
