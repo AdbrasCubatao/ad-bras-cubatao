@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
+// Atualizado 
 // Páginas Públicas (em src/pages/)
 import Home from './pages/Home.jsx'
 import Agenda from './pages/Agenda.jsx'
