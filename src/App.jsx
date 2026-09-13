@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-// Páginas Públicas
+// Importações ajustadas para a estrutura da pasta src/pages/
 import Home from './pages/Home.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Study from './pages/Study.jsx'
@@ -13,7 +13,7 @@ import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
-// Páginas Administrativas (Ajustadas para a pasta src/pages/)
+// Páginas Administrativas na pasta src/pages/
 import AdminLogin from './pages/AdminLogin.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import AdminAgenda from './pages/AdminAgenda.jsx'
