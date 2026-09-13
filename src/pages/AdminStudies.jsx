@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 
-
 export default function AdminStudies() {
   const [studies, setStudies] = useState([])
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     category: 'EBD - Adultos',
@@ -20,6 +20,9 @@ export default function AdminStudies() {
   const fetchStudies = async () => {
     try {
       setLoading(true)
+      setErrorMessage(null)
+      if (!supabase) throw new Error("Cliente Supabase não inicializado.")
+
       const { data, error } = await supabase
         .from('studies')
         .select('*')
@@ -28,7 +31,8 @@ export default function AdminStudies() {
       if (error) throw error
       setStudies(data || [])
     } catch (err) {
-      alert('Erro ao carregar estudos: ' + err.message)
+      console.error(err)
+      setErrorMessage(err.message || 'Erro ao carregar dados.')
     } finally {
       setLoading(false)
     }
@@ -72,6 +76,12 @@ export default function AdminStudies() {
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
       <h2>Painel do Administrador - Estudos & EBD</h2>
+
+      {errorMessage && (
+        <div style={{ padding: '15px', background: '#ffe6e6', color: '#d90000', borderRadius: '6px', marginBottom: '20px' }}>
+          <strong>Atenção:</strong> {errorMessage}
+        </div>
+      )}
 
       {/* Formulário de Cadastro */}
       <form onSubmit={handleSubmit} style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
@@ -145,6 +155,7 @@ export default function AdminStudies() {
       <h3>Estudos Publicados</h3>
       {loading ? <p>Carregando...</p> : (
         <div style={{ display: 'grid', gap: '15px' }}>
+          {studies.length === 0 && !errorMessage && <p>Nenhum estudo cadastrado ainda.</p>}
           {studies.map((item) => (
             <div key={item.id} style={{ display: 'flex', border: '1px solid #ddd', padding: '15px', borderRadius: '6px', alignItems: 'center', gap: '15px' }}>
               {item.cover_url && (
