@@ -94,3 +94,4 @@ supabase/
 - Foto do pastor
 - Cores oficiais da marca (se tiver um manual de marca)
 - Links reais das redes sociais, WhatsApp, endereço e telefone
+- <!-- deploy fix -->
