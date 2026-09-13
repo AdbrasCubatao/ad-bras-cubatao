@@ -9,7 +9,7 @@ import Announcements from './pages/Announcements.jsx'
 import Biblia from './pages/Biblia.jsx'
 import Departments from './pages/Departments.jsx'
 import DepartmentDetail from './pages/DepartmentDetail.jsx'
-import Dizimos from './pages/Dizimos jsx'
+import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
