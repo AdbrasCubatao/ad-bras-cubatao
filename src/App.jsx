@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 // Importações dos componentes
 import Home from './pages/Home.jsx'
@@ -18,6 +18,32 @@ import AdminLogin from './pages/admin/AdminLogin.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminAgenda from './pages/admin/AdminAgenda.jsx'
 import AdminStudies from './pages/admin/AdminStudies.jsx'
+
+// Componente para evitar Tela Branca em rotas não encontradas (404)
+function NotFound() {
+  return (
+    <div style={{ textAlign: 'center', padding: '50px 20px', fontFamily: 'sans-serif' }}>
+      <h1 style={{ fontSize: '48px', color: '#ef4444', margin: '0 0 10px 0' }}>404</h1>
+      <h2 style={{ color: '#1f2937', marginBottom: '20px' }}>Página Não Encontrada</h2>
+      <p style={{ color: '#4b5563', marginBottom: '30px' }}>
+        O endereço que você tentou acessar não existe ou foi alterado.
+      </p>
+      <Link 
+        to="/" 
+        style={{ 
+          padding: '12px 24px', 
+          backgroundColor: '#2563eb', 
+          color: '#fff', 
+          textDecoration: 'none', 
+          borderRadius: '8px', 
+          fontWeight: 'bold' 
+        }}
+      >
+        Voltar para o Início
+      </Link>
+    </div>
+  )
+}
 
 export default function App() {
   return (
@@ -41,6 +67,9 @@ export default function App() {
         <Route path="/admin/agenda" element={<AdminAgenda />} />
         <Route path="/admin/adminagenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
+
+        {/* Rota Coringa para Evitar Tela Branca */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )
