@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import supabaseClient, { supabase as supabaseNamed } from '../lib/supabaseClient.js'
-
-const client = supabaseClient || supabaseNamed
+import { supabase } from '../lib/supabaseClient.js'
 
 export default function Prayer() {
   const navigate = useNavigate()
   const [prayers, setPrayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  // Pega a data atual no formato YYYY-MM-DD
+  const getTodayString = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
 
   const [formData, setFormData] = useState({
     name: '',
-    request_date: new Date().toISOString().split('T')[0],
+    request_date: getTodayString(),
     request: ''
   })
 
@@ -23,13 +31,18 @@ export default function Prayer() {
   const fetchPrayers = async () => {
     try {
       setLoading(true)
+      setErrorMessage('')
       
       // Data limite: exatamente 30 dias atrás
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
       const dateString = thirtyDaysAgo.toISOString().split('T')[0]
 
-      const { data, error } = await client
+      if (!supabase) {
+        throw new Error("Cliente Supabase não inicializado.")
+      }
+
+      const { data, error } = await supabase
         .from('prayer_requests')
         .select('*')
         .gte('request_date', dateString)
@@ -38,8 +51,9 @@ export default function Prayer() {
       if (error) throw error
       setPrayers(data || [])
     } catch (err) {
-      console.error('Erro ao buscar pedidos:', err.message)
-    } finally {
+      console.error('Erro ao buscar pedidos:', err)
+      setErrorMessage(err.message || 'Erro ao carregar os pedidos de oração.')
+    } fontally {
       setLoading(false)
     }
   }
@@ -53,13 +67,20 @@ export default function Prayer() {
     setSubmitting(true)
 
     try {
-      const { error } = await client.from('prayer_requests').insert([formData])
+      if (!supabase) {
+        throw new Error("Cliente Supabase não encontrado.")
+      }
+
+      const { error } = await supabase
+        .from('prayer_requests')
+        .insert([formData])
+
       if (error) throw error
 
       alert('Seu pedido de oração foi enviado com sucesso!')
       setFormData({
         name: '',
-        request_date: new Date().toISOString().split('T')[0],
+        request_date: getTodayString(),
         request: ''
       })
       fetchPrayers()
@@ -68,6 +89,16 @@ export default function Prayer() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Função para formatar data sem distorcer por fuso horário
+  const formatDate = (dateStr) => {
+    if (!dateStr) return ''
+    const parts = dateStr.split('-')
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`
+    }
+    return dateStr
   }
 
   return (
@@ -86,10 +117,10 @@ export default function Prayer() {
       <h2 style={{ color: '#1f2937', textAlign: 'center', marginBottom: '8px' }}>Pedidos de Oração</h2>
       <p style={{ color: '#4b5563', textAlign: 'center', marginBottom: '24px', fontSize: '14px' }}>
         "Orai uns pelos outros..." — Tiago 5:16 <br />
-        <em>(Os pedidos ficam publicados no mural por 30 dias)</em>
+        <small style={{ color: '#6b7280' }}>(Os pedidos ficam publicados no mural por 30 dias)</small>
       </p>
 
-      {/* Form de Envio */}
+      {/* Formulário de Envio */}
       <form onSubmit={handleSubmit} style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '12px', border: '1px solid #e5e7eb', marginBottom: '32px' }}>
         <h3 style={{ margin: '0 0 16px 0', color: '#2563eb' }}>Enviar Pedido de Oração</h3>
 
@@ -140,6 +171,13 @@ export default function Prayer() {
         </button>
       </form>
 
+      {/* Exibição de Erro se Houver */}
+      {errorMessage && (
+        <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fca5a5' }}>
+          <strong>Aviso:</strong> {errorMessage}
+        </div>
+      )}
+
       {/* Mural de Pedidos Recentes */}
       <h3 style={{ color: '#1f2937', marginBottom: '16px' }}>Mural de Oração (Últimos 30 Dias)</h3>
 
@@ -152,11 +190,11 @@ export default function Prayer() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {prayers.map((item) => (
-            <div key={item.id} style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <strong style={{ color: '#111827', fontSize: '16px' }}>🙏 {item.name}</strong>
+                <strong style={{ color: '#111827', fontSize: '16px' }}>🙏 {item.name || 'Anônimo'}</strong>
                 <span style={{ fontSize: '12px', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px' }}>
-                  {item.request_date ? new Date(item.request_date + 'T00:00:00').toLocaleDateString('pt-BR') : ''}
+                  {formatDate(item.request_date)}
                 </span>
               </div>
               <p style={{ margin: 0, color: '#374151', fontSize: '15px', whiteSpace: 'pre-line' }}>{item.request}</p>
@@ -167,4 +205,4 @@ export default function Prayer() {
 
     </div>
   )
-}
+          }
