@@ -1,145 +1,107 @@
 import React, { useState, useEffect } from 'react'
-import SimplePage from './SimplePage.jsx'
-import { supabase } from '../lib/supabaseClient.js'
+import supabase from '../lib/supabaseClient.js'
 
 export default function Agenda() {
-  const [eventos, setEventos] = useState([])
+  const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filtro, setFiltro] = useState('todos')
 
   useEffect(() => {
-    fetchEventos()
+    fetchEvents()
   }, [])
 
-  async function fetchEventos() {
+  const fetchEvents = async () => {
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('created_at', { ascending: true })
+        .order('event_date', { ascending: true })
 
       if (error) throw error
-      setEventos(data || [])
+      setEvents(data || [])
     } catch (err) {
-      console.error('Erro ao carregar eventos:', err)
+      console.error('Erro ao buscar eventos:', err.message)
     } finally {
       setLoading(false)
     }
   }
 
-  const eventosFiltrados = filtro === 'todos' 
-    ? eventos 
-    : eventos.filter(ev => ev.category === filtro)
-
   return (
-    <SimplePage title="Agenda" subtitle="Nossos cultos e programação geral">
-      {/* Filtros em Botões */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '8px', 
-        overflowX: 'auto', 
-        paddingBottom: '12px',
-        marginBottom: '16px',
-        scrollbarWidth: 'none'
-      }}>
-        {[
-          { key: 'todos', label: 'Todos' },
-          { key: 'culto', label: '⛪ Cultos' },
-          { key: 'ensino', label: '📖 EBD & Doutrina' },
-          { key: 'jovens', label: '🔥 Jovens' },
-          { key: 'oracao', label: '🙏 Oração' },
-        ].map(item => (
-          <button
-            key={item.key}
-            onClick={() => setFiltro(item.key)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: 'none',
-              backgroundColor: filtro === item.key ? '#0a192f' : '#f0f4f8',
-              color: filtro === item.key ? '#ffffff' : '#4a5568',
-              fontSize: '13px',
-              fontWeight: '600',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer'
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h2 style={{ color: '#1a237e', textAlign: 'center', marginBottom: '25px' }}>📅 Agenda de Eventos & Cultos</h2>
 
       {loading ? (
-        <p style={{ textAlign: 'center', color: '#666', padding: '20px 0' }}>Carregando agenda...</p>
-      ) : eventosFiltrados.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#666', padding: '20px 0' }}>Nenhum evento encontrado nesta categoria.</p>
+        <p style={{ textAlign: 'center' }}>Carregando agenda...</p>
+      ) : events.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#666' }}>Nenhum evento agendado no momento.</p>
       ) : (
-        <div style={{ display: 'grid', gap: '14px' }}>
-          {eventosFiltrados.map(ev => (
-            <div
-              key={ev.id}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                padding: '16px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-                border: '1px solid #edf2f7',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{
-                  backgroundColor: '#ebf8ff',
-                  color: '#2b6cb0',
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  padding: '4px 10px',
-                  borderRadius: '8px'
-                }}>
-                  📅 {ev.day || 'Semanal'}
-                </span>
-                <span style={{
-                  backgroundColor: '#feebc8',
-                  color: '#c05621',
-                  fontSize: '13px',
-                  fontWeight: 'bold',
-                  padding: '4px 10px',
-                  borderRadius: '8px'
-                }}>
-                  ⏰ {ev.time}
-                </span>
+        <div style={{ display: 'grid', gap: '20px' }}>
+          {events.map((item) => {
+            const dateObj = new Date(item.event_date + 'T00:00:00')
+            const day = dateObj.getDate().toString().padStart(2, '0')
+            const month = dateObj.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase()
+
+            return (
+              <div
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  background: '#ffffff',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  overflow: 'hidden',
+                  border: '1px solid #eaeaea'
+                }}
+              >
+                {/* Bloco da Data */}
+                <div
+                  style={{
+                    background: '#1a237e',
+                    color: '#ffffff',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '15px 20px',
+                    minWidth: '80px',
+                    textAlign: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: '24px', fontWeight: 'bold', lineHeight: '1' }}>{day}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', marginTop: '4px' }}>{month}</span>
+                </div>
+
+                {/* Detalhes do Evento */}
+                <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span
+                      style={{
+                        background: '#e8eaf6',
+                        color: '#1a237e',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {item.category}
+                    </span>
+                    <span style={{ fontSize: '13px', color: '#555', fontWeight: 'bold' }}>⏰ {item.event_time}</span>
+                  </div>
+
+                  <h3 style={{ margin: '4px 0 6px 0', fontSize: '18px', color: '#222' }}>{item.title}</h3>
+
+                  <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#666' }}>📍 {item.location}</p>
+
+                  {item.description && (
+                    <p style={{ margin: '0', fontSize: '13px', color: '#444', lineHeight: '1.4' }}>{item.description}</p>
+                  )}
+                </div>
               </div>
-
-              <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: '#1a202c', margin: '4px 0 2px 0' }}>
-                {ev.title}
-              </h3>
-
-              {ev.description && (
-                <p style={{ fontSize: '13px', color: '#718096', margin: 0, lineHeight: '1.4' }}>
-                  {ev.description}
-                </p>
-              )}
-
-              <div style={{ 
-                marginTop: '6px', 
-                paddingTop: '8px', 
-                borderTop: '1px dashed #e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '12px',
-                color: '#4a5568',
-                fontWeight: '500'
-              }}>
-                📍 <span>{ev.location || 'Templo Sede'}</span>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
-    </SimplePage>
+    </div>
   )
 }
