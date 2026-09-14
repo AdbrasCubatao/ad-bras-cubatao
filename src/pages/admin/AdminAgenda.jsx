@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient.js'
+import supabaseClient, { supabase as supabaseNamed } from '../../lib/supabaseClient.js'
+
+// Garante que o cliente seja instanciado sem quebrar a execução
+const client = supabaseClient || supabaseNamed
 
 export default function AdminAgenda() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     category: 'Culto',
@@ -21,15 +25,22 @@ export default function AdminAgenda() {
   const fetchEvents = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
+      setErrorMessage('')
+
+      if (!client || typeof client.from !== 'function') {
+        throw new Error('O cliente do Supabase não foi inicializado corretamente. Verifique as Variáveis de Ambiente na Vercel.')
+      }
+
+      const { data, error } = await client
         .from('events')
         .select('*')
         .order('event_date', { ascending: true })
 
       if (error) throw error
-      setEvents(data || [])
+      setEvents(Array.isArray(data) ? data : [])
     } catch (err) {
-      alert('Erro ao carregar eventos: ' + err.message)
+      console.error('Erro ao carregar agenda:', err)
+      setErrorMessage(err.message || 'Erro desconhecido ao carregar eventos.')
     } finally {
       setLoading(false)
     }
@@ -38,7 +49,12 @@ export default function AdminAgenda() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const { error } = await supabase.from('events').insert([
+      if (!client || typeof client.from !== 'function') {
+        alert('Conexão com o banco indisponível.')
+        return
+      }
+
+      const { error } = await client.from('events').insert([
         {
           title: formData.title,
           category: formData.category,
@@ -69,9 +85,12 @@ export default function AdminAgenda() {
   }
 
   const handleDelete = async (id) => {
+    if (!id) return
     if (!window.confirm('Tem certeza que deseja excluir este evento?')) return
     try {
-      const { error } = await supabase.from('events').delete().eq('id', id)
+      if (!client || typeof client.from !== 'function') return
+
+      const { error } = await client.from('events').delete().eq('id', id)
       if (error) throw error
       fetchEvents()
     } catch (err) {
@@ -79,9 +98,27 @@ export default function AdminAgenda() {
     }
   }
 
+  // Função defensiva para formatação de data
+  const formatDateSafe = (dateString) => {
+    if (!dateString) return 'Data não informada'
+    try {
+      const date = new Date(dateString + 'T00:00:00')
+      if (isNaN(date.getTime())) return dateString
+      return date.toLocaleDateString('pt-BR')
+    } catch {
+      return dateString
+    }
+  }
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
       <h2>Painel do Administrador - Agenda & Eventos</h2>
+
+      {errorMessage && (
+        <div style={{ background: '#ffebee', color: '#c62828', padding: '12px', borderRadius: '6px', marginBottom: '20px', border: '1px solid #ef9a9a' }}>
+          <strong>Aviso de Erro:</strong> {errorMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
         <h3>Cadastrar Novo Evento</h3>
@@ -178,28 +215,40 @@ export default function AdminAgenda() {
       </form>
 
       <h3>Eventos Agendados</h3>
-      {loading ? <p>Carregando...</p> : (
+      {loading ? (
+        <p>Carregando eventos...</p>
+      ) : (
         <div style={{ display: 'grid', gap: '15px' }}>
-          {events.length === 0 ? <p>Nenhum evento agendado.</p> : events.map((item) => (
-            <div key={item.id} style={{ display: 'flex', border: '1px solid #ddd', padding: '15px', borderRadius: '6px', alignItems: 'center', gap: '15px', background: '#fff' }}>
-              {item.image_url && (
-                <img src={item.image_url} alt={item.title} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
-              )}
-              <div style={{ flex: 1 }}>
-                <h4 style={{ margin: '0 0 5px 0' }}>{item.title} <small style={{ color: '#0070f3', fontWeight: 'bold' }}>[{item.category}]</small></h4>
-                <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#333' }}>
-                  📅 <strong>{new Date(item.event_date + 'T00:00:00').toLocaleDateString('pt-BR')}</strong> às ⏰ <strong>{item.event_time}</strong> — 📍 {item.location}
-                </p>
-                {item.description && <p style={{ margin: '0', fontSize: '13px', color: '#666' }}>{item.description}</p>}
-              </div>
-              <button onClick={() => handleDelete(item.id)} style={{ background: '#ff4d4d', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}>
-                Excluir
-              </button>
-            </div>
-          ))}
+          {events.length === 0 ? (
+            <p>Nenhum evento agendado.</p>
+          ) : (
+            events.map((item) => {
+              if (!item) return null
+              return (
+                <div key={item.id || Math.random()} style={{ display: 'flex', border: '1px solid #ddd', padding: '15px', borderRadius: '6px', alignItems: 'center', gap: '15px', background: '#fff' }}>
+                  {item.image_url && (
+                    <img src={item.image_url} alt={item.title || 'Evento'} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: '0 0 5px 0' }}>
+                      {item.title || 'Sem Título'}{' '}
+                      <small style={{ color: '#0070f3', fontWeight: 'bold' }}>[{item.category || 'Geral'}]</small>
+                    </h4>
+                    <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#333' }}>
+                      📅 <strong>{formatDateSafe(item.event_date)}</strong> às ⏰ <strong>{item.event_time || '19:30'}</strong> — 📍 {item.location || 'Templo Sede'}
+                    </p>
+                    {item.description && <p style={{ margin: '0', fontSize: '13px', color: '#666' }}>{item.description}</p>}
+                  </div>
+                  <button onClick={() => handleDelete(item.id)} style={{ background: '#ff4d4d', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                    Excluir
+                  </button>
+                </div>
+              )
+            })
+          )}
         </div>
       )}
     </div>
   )
-                }
+  }
       
