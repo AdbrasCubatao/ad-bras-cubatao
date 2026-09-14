@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import supabase from '../../lib/supabaseClient.js'
+import { supabase } from '../../lib/supabaseClient.js'
 
 export default function AdminAgenda() {
   const [events, setEvents] = useState([])
@@ -201,4 +201,5 @@ export default function AdminAgenda() {
       )}
     </div>
   )
-                     }
+                }
+      
