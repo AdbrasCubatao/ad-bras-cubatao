@@ -1,7 +1,7 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react_router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
-// Importações com blocos try-catch internos / padrões
+// Importações dos componentes
 import Home from './pages/Home.jsx'
 import Agenda from './pages/Agenda.jsx'
 import Study from './pages/Study.jsx'
@@ -13,7 +13,7 @@ import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
 import Quiz from './pages/Quiz.jsx'
 
-// Admin
+// Painel de Administração
 import AdminLogin from './pages/admin/AdminLogin.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminAgenda from './pages/admin/AdminAgenda.jsx'
@@ -39,6 +39,7 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/agenda" element={<AdminAgenda />} />
+        <Route path="/admin/adminagenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
       </Routes>
     </Router>
