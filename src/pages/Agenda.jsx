@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import supabase from '../lib/supabaseClient.js'
+import { supabase } from '../lib/supabaseClient.js'
 
 export default function Agenda() {
   const [events, setEvents] = useState([])
@@ -53,7 +53,6 @@ export default function Agenda() {
                   border: '1px solid #eaeaea'
                 }}
               >
-                {/* Bloco da Data */}
                 <div
                   style={{
                     background: '#1a237e',
@@ -71,7 +70,6 @@ export default function Agenda() {
                   <span style={{ fontSize: '12px', fontWeight: 'bold', marginTop: '4px' }}>{month}</span>
                 </div>
 
-                {/* Detalhes do Evento */}
                 <div style={{ padding: '15px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span
@@ -90,7 +88,6 @@ export default function Agenda() {
                   </div>
 
                   <h3 style={{ margin: '4px 0 6px 0', fontSize: '18px', color: '#222' }}>{item.title}</h3>
-
                   <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#666' }}>📍 {item.location}</p>
 
                   {item.description && (
