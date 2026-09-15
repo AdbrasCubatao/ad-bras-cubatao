@@ -1,54 +1,33 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
-// Páginas Públicas
+// Páginas ativas
 import Home from './pages/Home.jsx'
-import Agenda from './pages/Agenda.jsx'
-import Announcements from './pages/Announcements.jsx'
-import Biblia from './pages/Biblia.jsx'
-import Departments from './pages/Departments.jsx'
-import DepartmentDetail from './pages/DepartmentDetail.jsx'
-import Dizimos from './pages/Dizimos.jsx'
 import Prayer from './pages/Prayer.jsx'
-import Quiz from './pages/Quiz.jsx'
-import SimplePage from './pages/SimplePage.jsx'
-import StaticPages from './pages/StaticPages.jsx'
-import Study from './pages/Study.jsx'
-
-// Páginas Administrativas (Pasta admin)
-import AdminLogin from './pages/admin/AdminLogin.jsx'
-import Dashboard from './pages/admin/Dashboard.jsx'
-import AdminAgenda from './pages/admin/AdminAgenda.jsx'
-import AdminStudies from './pages/admin/AdminStudies.jsx'
+import Announcements from './pages/Announcements.jsx'
 import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx'
 
 export default function App() {
   return (
     <Router>
-      <Routes>
-        {/* Rotas Públicas */}
-        <Route path="/" element={<Home />} />
-        <Route path="/agenda" element={<Agenda />} />
-        <Route path="/avisos" element={<Announcements />} />
-        <Route path="/biblia" element={<Biblia />} />
-        <Route path="/departamentos" element={<Departments />} />
-        <Route path="/departamentos/:id" element={<DepartmentDetail />} />
-        <Route path="/dizimos" element={<Dizimos />} />
-        <Route path="/pedidos-oracao" element={<Prayer />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/estudos" element={<Study />} />
-        <Route path="/pagina/:slug" element={<StaticPages />} />
+      <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <nav style={{ backgroundColor: '#1e3a8a', padding: '12px 20px', display: 'flex', gap: '16px' }}>
+          <Link to="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
+          <Link to="/pedidos-oracao" style={{ color: '#e2e8f0', textDecoration: 'none' }}>Oração</Link>
+          <Link to="/avisos" style={{ color: '#e2e8f0', textDecoration: 'none' }}>Avisos</Link>
+          <Link to="/admin/avisos" style={{ color: '#93c5fd', textDecoration: 'none', marginLeft: 'auto' }}>Painel Admin</Link>
+        </nav>
 
-        {/* Rotas Administrativas */}
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/agenda" element={<AdminAgenda />} />
-        <Route path="/admin/estudos" element={<AdminStudies />} />
-        <Route path="/admin/avisos" element={<AdminAnnouncements />} />
-
-        {/* Fallback 404 */}
-        <Route path="*" element={<SimplePage title="404" content="Página Não Encontrada" />} />
-      </Routes>
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/pedidos-oracao" element={<Prayer />} />
+            <Route path="/avisos" element={<Announcements />} />
+            <Route path="/admin/avisos" element={<AdminAnnouncements />} />
+            <Route path="*" element={<Home />} />
+          </Routes>
+        </main>
+      </div>
     </Router>
   )
 }
