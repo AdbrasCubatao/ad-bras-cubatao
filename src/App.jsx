@@ -1,3 +1,5 @@
+import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx'
+
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
@@ -47,13 +49,14 @@ export default function App() {
         <Route path="/pedidos-oracao" element={<Prayer />} />
         <Route path="/oracao" element={<Prayer />} /> {/* <--- Nova Rota Adicionada */}
         <Route path="/quiz" element={<Quiz />} />
-
+        
         {/* Rotas Administrativas */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/agenda" element={<AdminAgenda />} />
         <Route path="/admin/adminagenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
+<Route path="/admin/avisos" element={<AdminAnnouncements />} />
 
         {/* Rota Coringa - Evita Tela Branca */}
         <Route path="*" element={<NotFound />} />
