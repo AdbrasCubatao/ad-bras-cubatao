@@ -1,208 +1,170 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabaseClient.js'
+import { supabase } from '../lib/supabaseClient'
 
 export default function Prayer() {
-  const navigate = useNavigate()
   const [prayers, setPrayers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [name, setName] = useState('')
+  const [request, setRequest] = useState('')
+  const [isPrivate, setIsPrivate] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  // Pega a data atual no formato YYYY-MM-DD
-  const getTodayString = () => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  const [formData, setFormData] = useState({
-    name: '',
-    request_date: getTodayString(),
-    request: ''
-  })
+  const [successMsg, setSuccessMsg] = useState('')
 
   useEffect(() => {
     fetchPrayers()
   }, [])
 
-  const fetchPrayers = async () => {
+  async function fetchPrayers() {
     try {
       setLoading(true)
-      setErrorMessage('')
-      
-      // Data limite: exatamente 30 dias atrás
-      const thirtyDaysAgo = new Date()
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-      const dateString = thirtyDaysAgo.toISOString().split('T')[0]
-
-      if (!supabase) {
-        throw new Error("Cliente Supabase não inicializado.")
-      }
-
       const { data, error } = await supabase
         .from('prayer_requests')
         .select('*')
-        .gte('request_date', dateString)
-        .order('request_date', { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (error) throw error
       setPrayers(data || [])
     } catch (err) {
-      console.error('Erro ao buscar pedidos:', err)
-      setErrorMessage(err.message || 'Erro ao carregar os pedidos de oração.')
-    } fontally {
+      console.error('Erro ao carregar pedidos:', err)
+    } finally {
       setLoading(false)
     }
   }
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault()
-    setSubmitting(true)
+    if (!name.trim() || !request.trim()) return
 
     try {
-      if (!supabase) {
-        throw new Error("Cliente Supabase não encontrado.")
-      }
-
-      const { error } = await supabase
-        .from('prayer_requests')
-        .insert([formData])
+      setSubmitting(true)
+      const { error } = await supabase.from('prayer_requests').insert([
+        {
+          name: name.trim(),
+          request: request.trim(),
+          is_private: isPrivate
+        }
+      ])
 
       if (error) throw error
 
-      alert('Seu pedido de oração foi enviado com sucesso!')
-      setFormData({
-        name: '',
-        request_date: getTodayString(),
-        request: ''
-      })
+      setName('')
+      setRequest('')
+      setIsPrivate(false)
+      setSuccessMsg('Seu pedido de oração foi enviado com sucesso!')
+      setTimeout(() => setSuccessMsg(''), 5000)
       fetchPrayers()
     } catch (err) {
-      alert('Erro ao enviar pedido: ' + err.message)
+      alert('Erro ao enviar o pedido. Tente novamente.')
+      console.error(err)
     } finally {
       setSubmitting(false)
     }
   }
 
-  // Função para formatar data sem distorcer por fuso horário
-  const formatDate = (dateStr) => {
-    if (!dateStr) return ''
-    const parts = dateStr.split('-')
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`
-    }
-    return dateStr
-  }
-
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      
-      {/* Botão Voltar */}
-      <div style={{ marginBottom: '20px' }}>
-        <button 
-          onClick={() => navigate('/')} 
-          style={{ padding: '8px 14px', background: '#4b5563', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          ← Voltar ao Início
-        </button>
-      </div>
-
-      <h2 style={{ color: '#1f2937', textAlign: 'center', marginBottom: '8px' }}>Pedidos de Oração</h2>
-      <p style={{ color: '#4b5563', textAlign: 'center', marginBottom: '24px', fontSize: '14px' }}>
-        "Orai uns pelos outros..." — Tiago 5:16 <br />
-        <small style={{ color: '#6b7280' }}>(Os pedidos ficam publicados no mural por 30 dias)</small>
-      </p>
-
-      {/* Formulário de Envio */}
-      <form onSubmit={handleSubmit} style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '12px', border: '1px solid #e5e7eb', marginBottom: '32px' }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#2563eb' }}>Enviar Pedido de Oração</h3>
-
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>Seu Nome / Nome de quem precisa:</label>
-          <input 
-            type="text" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleChange} 
-            placeholder="Ex: Maria da Silva"
-            required 
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }} 
-          />
-        </div>
-
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>Data do Pedido:</label>
-          <input 
-            type="date" 
-            name="request_date" 
-            value={formData.request_date} 
-            onChange={handleChange} 
-            required 
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }} 
-          />
-        </div>
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px', fontSize: '14px' }}>Relato / Pedido de Oração:</label>
-          <textarea 
-            name="request" 
-            value={formData.request} 
-            onChange={handleChange} 
-            rows="4" 
-            placeholder="Escreva aqui pelo que devemos orar..."
-            required 
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box' }} 
-          />
-        </div>
-
-        <button 
-          type="submit" 
-          disabled={submitting}
-          style={{ width: '100%', backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
-        >
-          {submitting ? 'Enviando...' : 'Enviar Pedido de Oração'}
-        </button>
-      </form>
-
-      {/* Exibição de Erro se Houver */}
-      {errorMessage && (
-        <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fca5a5' }}>
-          <strong>Aviso:</strong> {errorMessage}
-        </div>
-      )}
-
-      {/* Mural de Pedidos Recentes */}
-      <h3 style={{ color: '#1f2937', marginBottom: '16px' }}>Mural de Oração (Últimos 30 Dias)</h3>
-
-      {loading ? (
-        <p style={{ textAlign: 'center', color: '#6b7280' }}>Carregando pedidos...</p>
-      ) : prayers.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
-          Nenhum pedido de oração cadastrado nos últimos 30 dias.
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
+      <header style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <h1 style={{ color: '#1e3a8a', fontSize: '28px', marginBottom: '8px' }}>
+          🙏 Pedidos de Oração
+        </h1>
+        <p style={{ color: '#4b5563', fontSize: '15px' }}>
+          "Orai uns pelos outros para serdes curados. A oração feita por um justo pode muito em seus efeitos." — Tiago 5:16
         </p>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {prayers.map((item) => (
-            <div key={item.id || Math.random()} style={{ backgroundColor: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <strong style={{ color: '#111827', fontSize: '16px' }}>🙏 {item.name || 'Anônimo'}</strong>
-                <span style={{ fontSize: '12px', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px' }}>
-                  {formatDate(item.request_date)}
-                </span>
-              </div>
-              <p style={{ margin: 0, color: '#374151', fontSize: '15px', whiteSpace: 'pre-line' }}>{item.request}</p>
-            </div>
-          ))}
-        </div>
-      )}
+      </header>
 
+      {/* Form de Envio */}
+      <section style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
+        <h2 style={{ fontSize: '18px', color: '#0f172a', marginBottom: '16px' }}>Deixe seu Pedido</h2>
+        
+        {successMsg && (
+          <div style={{ backgroundColor: '#dcfce7', color: '#15803d', padding: '12px', borderRadius: '8px', marginBottom: '16px', fontWeight: 'bold' }}>
+            {successMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#334155', marginBottom: '4px' }}>
+              Seu Nome:
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Digite seu nome ou 'Anônimo'"
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', color: '#334155', marginBottom: '4px' }}>
+              Pedido de Oração:
+            </label>
+            <textarea
+              value={request}
+              onChange={(e) => setRequest(e.target.value)}
+              placeholder="Escreva motivo de oração..."
+              rows={4}
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              padding: '12px',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              cursor: submitting ? 'not-allowed' : 'pointer',
+              fontSize: '15px'
+            }}
+          >
+            {submitting ? 'Enviando...' : 'Enviar Pedido de Oração'}
+          </button>
+        </form>
+      </section>
+
+      {/* Lista de Pedidos Publicos */}
+      <section>
+        <h2 style={{ fontSize: '20px', color: '#0f172a', marginBottom: '16px' }}>Mural de Oração</h2>
+
+        {loading ? (
+          <p style={{ textAlign: 'center', color: '#64748b' }}>Carregando pedidos...</p>
+        ) : prayers.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#64748b' }}>Nenhum pedido cadastrado ainda. Seja o primeiro!</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {prayers.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '16px',
+                  borderRadius: '10px',
+                  borderLeft: '4px solid #2563eb',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <strong style={{ color: '#1e293b', fontSize: '15px' }}>{item.name}</strong>
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                  </span>
+                </div>
+                <p style={{ color: '#334155', fontSize: '14px', lineHeight: '1.5', margin: 0 }}>
+                  {item.request}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   )
-          }
+                     }
