@@ -47,7 +47,6 @@ export default function Dashboard() {
           📅 Gerenciar Agenda
         </Link>
 
-        {/* Novo botão de Avisos */}
         <Link
           to="/admin/avisos"
           style={{
