@@ -46,7 +46,7 @@ export default function App() {
         <Route path="/admin/estudos" element={<AdminStudies />} />
         <Route path="/admin/avisos" element={<AdminAnnouncements />} />
 
-        {/* Rota Fallback para 404 */}
+        {/* Fallback 404 */}
         <Route path="*" element={<SimplePage title="404" content="Página Não Encontrada" />} />
       </Routes>
     </Router>
