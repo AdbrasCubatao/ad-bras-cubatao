@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 // Páginas Públicas
 import Home from './pages/Home.jsx'
@@ -15,7 +15,7 @@ import SimplePage from './pages/SimplePage.jsx'
 import StaticPages from './pages/StaticPages.jsx'
 import Study from './pages/Study.jsx'
 
-// Páginas Administrativas
+// Páginas Administrativas (Pasta admin)
 import AdminLogin from './pages/admin/AdminLogin.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminAgenda from './pages/admin/AdminAgenda.jsx'
