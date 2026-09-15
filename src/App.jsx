@@ -1,5 +1,3 @@
-import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx'
-
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
@@ -20,6 +18,7 @@ import AdminLogin from './pages/admin/AdminLogin.jsx'
 import Dashboard from './pages/admin/Dashboard.jsx'
 import AdminAgenda from './pages/admin/AdminAgenda.jsx'
 import AdminStudies from './pages/admin/AdminStudies.jsx'
+import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx'
 
 function NotFound() {
   return (
@@ -47,7 +46,7 @@ export default function App() {
         <Route path="/departamentos/:id" element={<DepartmentDetail />} />
         <Route path="/dizimos" element={<Dizimos />} />
         <Route path="/pedidos-oracao" element={<Prayer />} />
-        <Route path="/oracao" element={<Prayer />} /> {/* <--- Nova Rota Adicionada */}
+        <Route path="/oracao" element={<Prayer />} />
         <Route path="/quiz" element={<Quiz />} />
         
         {/* Rotas Administrativas */}
@@ -56,7 +55,7 @@ export default function App() {
         <Route path="/admin/agenda" element={<AdminAgenda />} />
         <Route path="/admin/adminagenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
-<Route path="/admin/avisos" element={<AdminAnnouncements />} />
+        <Route path="/admin/avisos" element={<AdminAnnouncements />} />
 
         {/* Rota Coringa - Evita Tela Branca */}
         <Route path="*" element={<NotFound />} />
