@@ -1,33 +1,25 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
-// Páginas ativas
-import Home from './pages/Home.jsx'
-import Prayer from './pages/Prayer.jsx'
-import Announcements from './pages/Announcements.jsx'
-import AdminAnnouncements from './pages/admin/AdminAnnouncements.jsx'
+import Home from './pages/Home'
+import Prayer from './pages/Prayer'
+import Admin from './pages/Admin'
 
 export default function App() {
   return (
     <Router>
-      <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-        <nav style={{ backgroundColor: '#1e3a8a', padding: '12px 20px', display: 'flex', gap: '16px' }}>
-          <Link to="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
-          <Link to="/pedidos-oracao" style={{ color: '#e2e8f0', textDecoration: 'none' }}>Oração</Link>
-          <Link to="/avisos" style={{ color: '#e2e8f0', textDecoration: 'none' }}>Avisos</Link>
-          <Link to="/admin/avisos" style={{ color: '#93c5fd', textDecoration: 'none', marginLeft: 'auto' }}>Painel Admin</Link>
-        </nav>
+      <nav style={{ padding: '12px 20px', backgroundColor: '#1e3a8a', color: '#fff', display: 'flex', gap: '15px' }}>
+        <Link to="/" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
+        <Link to="/oracao" style={{ color: '#fff', textDecoration: 'none' }}>Pedidos de Oração</Link>
+        <Link to="/admin" style={{ color: '#fff', textDecoration: 'none', marginLeft: 'auto' }}>Painel Admin</Link>
+      </nav>
 
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/pedidos-oracao" element={<Prayer />} />
-            <Route path="/avisos" element={<Announcements />} />
-            <Route path="/admin/avisos" element={<AdminAnnouncements />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/oracao" element={<Prayer />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
     </Router>
   )
 }
