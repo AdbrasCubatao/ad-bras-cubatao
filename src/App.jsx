@@ -1,25 +1,43 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
-import Home from './pages/Home'
-import Prayer from './pages/Prayer'
-import Admin from './pages/Admin'
+// Páginas Originais do Seu Projeto
+import Home from './pages/Home.jsx'
+import Agenda from './pages/Agenda.jsx'
+import Biblia from './pages/Biblia.jsx'
+import Departments from './pages/Departments.jsx'
+import DepartmentDetail from './pages/DepartmentDetail.jsx'
+import Dizimos from './pages/Dizimos.jsx'
+import Prayer from './pages/Prayer.jsx'
+import Quiz from './pages/Quiz.jsx'
+import SimplePage from './pages/SimplePage.jsx'
+import StaticPages from './pages/StaticPages.jsx'
+import Study from './pages/Study.jsx'
+
+// Páginas de Avisos
+import Announcements from './pages/Announcements.jsx'
 
 export default function App() {
   return (
     <Router>
-      <nav style={{ padding: '12px 20px', backgroundColor: '#1e3a8a', color: '#fff', display: 'flex', gap: '15px' }}>
-        <Link to="/" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
-        <Link to="/oracao" style={{ color: '#fff', textDecoration: 'none' }}>Pedidos de Oração</Link>
-        <Link to="/admin" style={{ color: '#fff', textDecoration: 'none', marginLeft: 'auto' }}>Painel Admin</Link>
-      </nav>
-
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/oracao" element={<Prayer />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/agenda" element={<Agenda />} />
+        <Route path="/biblia" element={<Biblia />} />
+        <Route path="/departamentos" element={<Departments />} />
+        <Route path="/departamentos/:id" element={<DepartmentDetail />} />
+        <Route path="/dizimos" element={<Dizimos />} />
+        <Route path="/pedidos-oracao" element={<Prayer />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/estudos" element={<Study />} />
+        <Route path="/pagina/:slug" element={<StaticPages />} />
+        
+        {/* Rota de Avisos */}
+        <Route path="/avisos" element={<Announcements />} />
+
+        {/* Fallback */}
         <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   )
-}
+          }
