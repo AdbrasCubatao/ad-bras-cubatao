@@ -45,6 +45,7 @@ export default function App() {
         <Route path="/departamentos/:id" element={<DepartmentDetail />} />
         <Route path="/dizimos" element={<Dizimos />} />
         <Route path="/pedidos-oracao" element={<Prayer />} />
+        <Route path="/oracao" element={<Prayer />} /> {/* <--- Nova Rota Adicionada */}
         <Route path="/quiz" element={<Quiz />} />
 
         {/* Rotas Administrativas */}
@@ -54,7 +55,7 @@ export default function App() {
         <Route path="/admin/adminagenda" element={<AdminAgenda />} />
         <Route path="/admin/estudos" element={<AdminStudies />} />
 
-        {/* Rota Coringa */}
+        {/* Rota Coringa - Evita Tela Branca */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
