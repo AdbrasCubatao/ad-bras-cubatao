@@ -41,8 +41,8 @@ class ErrorBoundary extends Component {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <Router>
+    <Router>
+      <ErrorBoundary>
         <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
           <nav style={{ backgroundColor: '#1e3a8a', padding: '15px 20px', display: 'flex', gap: '20px' }}>
             <Link to="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 'bold' }}>Início</Link>
@@ -57,7 +57,7 @@ export default function App() {
             </Routes>
           </main>
         </div>
-      </Router>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </Router>
   )
 }
