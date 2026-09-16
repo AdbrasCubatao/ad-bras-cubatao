@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState([])
   const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState(null)
 
   useEffect(() => {
     fetchAnnouncements()
@@ -12,6 +13,8 @@ export default function Announcements() {
   async function fetchAnnouncements() {
     try {
       setLoading(true)
+      setErrorMsg(null)
+
       const { data, error } = await supabase
         .from('announcements')
         .select('*')
@@ -22,9 +25,19 @@ export default function Announcements() {
       setAnnouncements(data || [])
     } catch (err) {
       console.error('Erro ao carregar avisos:', err)
+      setErrorMsg('Não foi possível carregar os avisos no momento.')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Função utilitária para formatar datas sem problemas de fuso horário
+  const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const cleanDate = dateString.split('T')[0]
+    const [year, month, day] = cleanDate.split('-')
+    if (!year || !month || !day) return dateString
+    return `${day}/${month}/${year}`
   }
 
   return (
@@ -35,13 +48,17 @@ export default function Announcements() {
       <p style={{ color: '#64748b', marginBottom: '24px' }}>Fique por dentro das novidades e programação da nossa igreja.</p>
 
       {loading ? (
-        <p>Carregando avisos...</p>
+        <p style={{ color: '#64748b', textAlign: 'center' }}>Carregando avisos...</p>
+      ) : errorMsg ? (
+        <div style={{ padding: '16px', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '8px', border: '1px solid #fecaca' }}>
+          {errorMsg}
+        </div>
       ) : announcements.length === 0 ? (
-        <p style={{ color: '#64748b' }}>Nenhum aviso publicado no momento.</p>
+        <p style={{ color: '#64748b', textAlign: 'center' }}>Nenhum aviso publicado no momento.</p>
       ) : (
         <div style={{ display: 'grid', gap: '20px' }}>
           {announcements.map((item) => (
-            <div
+            <article
               key={item.id}
               style={{
                 backgroundColor: '#fff',
@@ -51,17 +68,30 @@ export default function Announcements() {
                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
               }}
             >
-              {item.is_pinned && (
-                <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '8px' }}>
-                  📌 DESTAQUE
-                </span>
-              )}
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#1e293b' }}>{item.title}</h2>
-              <p style={{ color: '#334155', lineHeight: '1.5', margin: '0 0 12px 0', whiteSpace: 'pre-line' }}>{item.description}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                {item.is_pinned && (
+                  <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                    📌 DESTAQUE
+                  </span>
+                )}
+                {item.created_at && (
+                  <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: 'auto' }}>
+                    Publicado em {formatDate(item.created_at)}
+                  </span>
+                )}
+              </div>
+
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#1e293b' }}>
+                {item.title}
+              </h2>
+
+              <p style={{ color: '#334155', lineHeight: '1.5', margin: '0 0 12px 0', whiteSpace: 'pre-line' }}>
+                {item.description}
+              </p>
 
               {(item.event_date || item.location) && (
-                <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  {item.event_date && <span>📅 Data: {item.event_date}</span>}
+                <div style={{ fontSize: '13px', color: '#64748b', display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: item.image_url ? '12px' : '0' }}>
+                  {item.event_date && <span>📅 Data: {formatDate(item.event_date)}</span>}
                   {item.location && <span>📍 Local: {item.location}</span>}
                 </div>
               )}
@@ -70,10 +100,11 @@ export default function Announcements() {
                 <img
                   src={item.image_url}
                   alt={item.title}
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
                   style={{ width: '100%', maxHeight: '350px', objectFit: 'cover', borderRadius: '8px', marginTop: '12px' }}
                 />
               )}
-            </div>
+            </article>
           ))}
         </div>
       )}
