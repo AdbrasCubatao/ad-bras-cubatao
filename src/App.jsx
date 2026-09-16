@@ -17,26 +17,16 @@ import AdminStudies from './pages/AdminStudies.jsx'
 import AdminAgenda from './pages/AdminAgenda.jsx'
 import AdminAnnouncements from './pages/AdminAnnouncements.jsx'
 
-// Tela de Carregamento para Evitar Piscar em Branco
+// Loading padronizado
 function LoadingFallback() {
   return (
-    <div style={{
-      display: 'grid',
-      placeItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#FAF8F3',
-      color: '#0B1F3A',
-      fontFamily: 'sans-serif'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <p style={{ fontWeight: '600', marginBottom: '8px' }}>Carregando AD Brás Cubatão...</p>
-        <span style={{ fontSize: '12px', color: '#55606F' }}>Aguarde um momento</span>
-      </div>
+    <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', backgroundColor: '#FAF8F3', color: '#0B1F3A', fontFamily: 'sans-serif' }}>
+      <p style={{ fontWeight: '600' }}>Carregando AD Brás Cubatão...</p>
     </div>
   )
 }
 
-// Proteção de Rota Rígida contra Dados Nulos
+// Validação de Acesso Administrativo
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
 
@@ -49,30 +39,6 @@ function ProtectedRoute({ children }) {
   }
 
   return children
-}
-
-// Fallback Visual para Rotas Desconhecidas (404)
-function NotFoundPage() {
-  return (
-    <div style={{ padding: '40px 20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h2 style={{ color: '#0B1F3A' }}>Página não encontrada</h2>
-      <p style={{ color: '#55606F', fontSize: '14px' }}>O endereço acessado não existe ou mudou de local.</p>
-      <a 
-        href="/" 
-        style={{ 
-          display: 'inline-block', 
-          marginTop: '16px', 
-          padding: '10px 20px', 
-          backgroundColor: '#0B1F3A', 
-          color: '#fff', 
-          borderRadius: '6px',
-          textDecoration: 'none'
-        }}
-      >
-        Voltar para o Início
-      </a>
-    </div>
-  )
 }
 
 export default function App() {
@@ -118,8 +84,8 @@ export default function App() {
             }
           />
 
-          {/* Captura qualquer rota desconhecida */}
-          <Route path="*" element={<NotFoundPage />} />
+          {/* Redirecionamento seguro */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
 
