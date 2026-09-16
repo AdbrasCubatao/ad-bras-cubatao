@@ -1,7 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
-// Importações diretas e seguras
 import Home from './pages/Home.jsx'
 import Prayer from './pages/Prayer.jsx'
 
