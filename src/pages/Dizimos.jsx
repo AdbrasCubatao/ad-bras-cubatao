@@ -5,13 +5,29 @@ export default function Dizimos() {
   const navigate = useNavigate()
   const [copiado, setCopiado] = useState(false)
 
-  // Chave PIX oficial da igreja
+  // Chave PIX oficial da igreja (pode ser o CNPJ sem formatação na hora de copiar)
   const chavePix = "50.317.711/0001-62" 
+  const chavePixLimpa = "50317711000162"
 
-  const copiarPix = () => {
-    navigator.clipboard.writeText(chavePix)
-    setCopiado(true)
-    setTimeout(() => setCopiado(false), 3000)
+  const copiarPix = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(chavePixLimpa)
+      } else {
+        // Fallback para navegadores legados / sem suporte a Clipboard API
+        const textArea = document.createElement('textarea')
+        textArea.value = chavePixLimpa
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+      }
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 3000)
+    } catch (err) {
+      console.error('Falha ao copiar a chave:', err)
+      alert(`Copie manualmente: ${chavePix}`)
+    }
   }
 
   return (
@@ -28,7 +44,7 @@ export default function Dizimos() {
       </div>
 
       <h2 style={{ color: '#1f2937', marginBottom: '8px' }}>Dízimos e Ofertas</h2>
-      <p style={{ color: '#4b5563', marginBottom: '24px' }}>
+      <p style={{ color: '#4b5563', marginBottom: '24px', lineHeight: '1.4', fontSize: '14px' }}>
         "Cada um contribua segundo propôs no seu coração; não com tristeza, ou por necessidade; porque Deus ama ao que dá com alegria." — 2 Co 9:7
       </p>
 
@@ -37,7 +53,7 @@ export default function Dizimos() {
         <h3 style={{ margin: '0 0 12px 0', color: '#2563eb' }}>Contribuição via PIX</h3>
         
         {/* Detalhes Bancários */}
-        <div style={{ textAlignment: 'left', backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '16px', fontSize: '14px', color: '#374151' }}>
+        <div style={{ textAlign: 'left', backgroundColor: '#ffffff', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', marginBottom: '16px', fontSize: '14px', color: '#374151' }}>
           <p style={{ margin: '4px 0' }}><strong>Banco:</strong> CORA SCD S.A.</p>
           <p style={{ margin: '4px 0' }}><strong>CNPJ:</strong> 50.317.711/0001-62</p>
         </div>
