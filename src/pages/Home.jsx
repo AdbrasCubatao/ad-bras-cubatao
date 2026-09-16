@@ -4,11 +4,11 @@ import { VerseBanner, SocialLinks } from '../components/VerseAndSocial.jsx'
 
 export default function Home() {
   return (
-    <div>
+    <main>
       <Hero />
       <QuickAccessGrid />
       <VerseBanner />
       <SocialLinks />
-    </div>
+    </main>
   )
 }
