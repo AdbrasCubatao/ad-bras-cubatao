@@ -4,21 +4,24 @@ import supabaseClient, { supabase as supabaseNamed } from '../../lib/supabaseCli
 
 const client = supabaseClient || supabaseNamed
 
+const INITIAL_FORM_STATE = {
+  title: '',
+  category: 'Culto',
+  location: 'Templo Sede',
+  event_date: '',
+  event_time: '19:30',
+  description: '',
+  image_url: ''
+}
+
 export default function AdminAgenda() {
   const navigate = useNavigate()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
+  const [editingId, setEditingId] = useState(null)
 
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'Culto',
-    location: 'Templo Sede',
-    event_date: '',
-    event_time: '19:30',
-    description: '',
-    image_url: ''
-  })
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE)
 
   useEffect(() => {
     fetchEvents()
@@ -46,22 +49,56 @@ export default function AdminAgenda() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  const handleEdit = (evt) => {
+    setEditingId(evt.id)
+    setFormData({
+      title: evt.title || '',
+      category: evt.category || 'Culto',
+      location: evt.location || 'Templo Sede',
+      event_date: evt.event_date || '',
+      event_time: evt.event_time || '19:30',
+      description: evt.description || '',
+      image_url: evt.image_url || ''
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setFormData(INITIAL_FORM_STATE)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Trata valores opcionais vazios salvando null no banco
+    const payload = {
+      ...formData,
+      image_url: formData.image_url.trim() || null,
+      description: formData.description.trim() || null
+    }
+
     try {
-      const { error } = await client.from('events').insert([formData])
-      if (error) throw error
-      
-      alert('Evento cadastrado com sucesso!')
-      setFormData({
-        title: '',
-        category: 'Culto',
-        location: 'Templo Sede',
-        event_date: '',
-        event_time: '19:30',
-        description: '',
-        image_url: ''
-      })
+      if (editingId) {
+        // Atualizar evento existente
+        const { error } = await client
+          .from('events')
+          .update(payload)
+          .eq('id', editingId)
+
+        if (error) throw error
+        alert('Evento atualizado com sucesso!')
+      } else {
+        // Inserir novo evento
+        const { error } = await client
+          .from('events')
+          .insert([payload])
+
+        if (error) throw error
+        alert('Evento cadastrado com sucesso!')
+      }
+
+      cancelEdit()
       fetchEvents()
     } catch (err) {
       alert('Erro ao salvar evento: ' + err.message)
@@ -82,7 +119,7 @@ export default function AdminAgenda() {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
       
-      {/* Botões de Navegação para Voltar */}
+      {/* Navegação */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <button 
           onClick={() => navigate('/')} 
@@ -106,9 +143,9 @@ export default function AdminAgenda() {
         </div>
       )}
 
-      {/* Formulário de Cadastro */}
+      {/* Formulário de Cadastro e Edição */}
       <form onSubmit={handleSubmit} style={{ backgroundColor: '#f9fafb', padding: '20px', borderRadius: '8px', marginBottom: '30px', border: '1px solid #e5e7eb' }}>
-        <h3>Cadastrar Novo Evento</h3>
+        <h3>{editingId ? '✏️ Editar Evento' : '➕ Cadastrar Novo Evento'}</h3>
         
         <div style={{ marginBottom: '12px' }}>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}>Título do Evento / Culto:</label>
@@ -152,9 +189,17 @@ export default function AdminAgenda() {
           <input type="text" name="image_url" value={formData.image_url} onChange={handleChange} style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }} />
         </div>
 
-        <button type="submit" style={{ backgroundColor: '#2563eb', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-          Salvar Evento
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="submit" style={{ backgroundColor: editingId ? '#d97706' : '#2563eb', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+            {editingId ? 'Atualizar Evento' : 'Salvar Evento'}
+          </button>
+          
+          {editingId && (
+            <button type="button" onClick={cancelEdit} style={{ backgroundColor: '#6b7280', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+              Cancelar Edição
+            </button>
+          )}
+        </div>
       </form>
 
       {/* Lista de Eventos Cadastrados */}
@@ -172,13 +217,18 @@ export default function AdminAgenda() {
                 <p style={{ margin: '0', color: '#666', fontSize: '14px' }}>📅 {evt.event_date} às ⏰ {evt.event_time} — 📍 {evt.location}</p>
                 {evt.description && <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#444' }}>{evt.description}</p>}
               </div>
-              <button onClick={() => handleDelete(evt.id)} style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
-                Excluir
-              </button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={() => handleEdit(evt)} style={{ backgroundColor: '#d97706', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                  Editar
+                </button>
+                <button onClick={() => handleDelete(evt.id)} style={{ backgroundColor: '#dc2626', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}>
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
         </div>
       )}
     </div>
   )
-            }
+}
