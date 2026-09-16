@@ -6,6 +6,7 @@ export default function AdminAnnouncements() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [dbError, setDbError] = useState(null)
+  const [editingId, setEditingId] = useState(null)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -25,6 +26,7 @@ export default function AdminAnnouncements() {
       const { data, error } = await supabase
         .from('announcements')
         .select('*')
+        .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -37,6 +39,27 @@ export default function AdminAnnouncements() {
     }
   }
 
+  function resetForm() {
+    setTitle('')
+    setDescription('')
+    setImageUrl('')
+    setEventDate('')
+    setLocation('')
+    setIsPinned(false)
+    setEditingId(null)
+  }
+
+  function handleEdit(item) {
+    setEditingId(item.id)
+    setTitle(item.title || '')
+    setDescription(item.description || '')
+    setImageUrl(item.image_url || '')
+    setEventDate(item.event_date || '')
+    setLocation(item.location || '')
+    setIsPinned(item.is_pinned || false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (!title.trim() || !description.trim()) {
@@ -46,7 +69,7 @@ export default function AdminAnnouncements() {
 
     try {
       setSubmitting(true)
-      const newAviso = {
+      const payload = {
         title: title.trim(),
         description: description.trim(),
         image_url: imageUrl.trim() || null,
@@ -55,18 +78,26 @@ export default function AdminAnnouncements() {
         is_pinned: isPinned
       }
 
-      const { error } = await supabase.from('announcements').insert([newAviso])
+      if (editingId) {
+        // Atualizar registro existente
+        const { error } = await supabase
+          .from('announcements')
+          .update(payload)
+          .eq('id', editingId)
 
-      if (error) throw error
+        if (error) throw error
+        alert('Aviso atualizado com sucesso!')
+      } else {
+        // Criar novo registro
+        const { error } = await supabase
+          .from('announcements')
+          .insert([payload])
 
-      setTitle('')
-      setDescription('')
-      setImageUrl('')
-      setEventDate('')
-      setLocation('')
-      setIsPinned(false)
+        if (error) throw error
+        alert('Aviso publicado com sucesso!')
+      }
 
-      alert('Aviso publicado com sucesso!')
+      resetForm()
       fetchAnnouncements()
     } catch (err) {
       alert('Erro ao salvar no banco: ' + err.message + '\n\nCertifique-se de executar o script SQL no Supabase.')
@@ -104,9 +135,11 @@ export default function AdminAnnouncements() {
         </div>
       )}
 
-      {/* Formulário de Cadastro */}
+      {/* Formulário de Cadastro e Edição */}
       <section style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '30px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', color: '#334155' }}>Novo Aviso</h2>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', color: '#334155' }}>
+          {editingId ? '✏️ Editar Aviso' : '➕ Novo Aviso'}
+        </h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>Título *</label>
@@ -178,13 +211,24 @@ export default function AdminAnnouncements() {
             </label>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{ backgroundColor: '#2563eb', color: '#fff', padding: '12px', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', marginTop: '8px' }}
-          >
-            {submitting ? 'Publicando...' : 'Salvar e Publicar'}
-          </button>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <button
+              type="submit"
+              disabled={submitting}
+              style={{ flex: 1, backgroundColor: editingId ? '#d97706' : '#2563eb', color: '#fff', padding: '12px', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
+            >
+              {submitting ? 'Salvando...' : editingId ? 'Atualizar Aviso' : 'Salvar e Publicar'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                style={{ backgroundColor: '#64748b', color: '#fff', padding: '12px 16px', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
         </form>
       </section>
 
@@ -207,12 +251,20 @@ export default function AdminAnnouncements() {
                     {item.description.substring(0, 60)}{item.description.length > 60 ? '...' : ''}
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
-                >
-                  Excluir
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleEdit(item)}
+                    style={{ backgroundColor: '#f59e0b', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
