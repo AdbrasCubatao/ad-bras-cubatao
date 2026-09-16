@@ -1,105 +1,130 @@
-import React, { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { supabase } from '../lib/supabase.js'
+import React, { Suspense } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
+// Libs e Hooks
+import { useAuth } from './lib/useAuth.js'
 
-  const navigate = useNavigate()
-  const location = useLocation()
-  const from = location.state?.from?.pathname || '/admin'
+// Componentes
+import BottomNav from './components/BottomNav.jsx'
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setErrorMsg('')
+// Páginas Públicas
+import Home from './pages/Home.jsx'
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+// Páginas do Painel Admin
+import AdminLogin from './pages/AdminLogin.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+import AdminStudies from './pages/AdminStudies.jsx'
+import AdminAgenda from './pages/AdminAgenda.jsx'
+import AdminAnnouncements from './pages/AdminAnnouncements.jsx'
 
-    if (error) {
-      setErrorMsg('E-mail ou senha incorretos.')
-      setLoading(false)
-    } else {
-      navigate(from, { replace: true })
-    }
-  }
-
+// 1. Tela de Carregamento para Evitar Piscar em Branco
+function LoadingFallback() {
   return (
     <div style={{
+      display: 'grid',
+      placeItems: 'center',
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      backgroundColor: '#f8fafc'
+      backgroundColor: '#FAF8F3',
+      color: '#0B1F3A',
+      fontFamily: 'sans-serif'
     }}>
-      <form onSubmit={handleLogin} style={{
-        width: '100%',
-        maxWidth: '360px',
-        backgroundColor: '#ffffff',
-        padding: '24px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-      }}>
-        <h2 style={{ margin: '0 0 16px 0', fontSize: '20px', textAlign: 'center', color: '#0f172a' }}>
-          Painel Administrativo
-        </h2>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ fontWeight: '600', marginBottom: '8px' }}>Carregando AD Brás Cubatão...</p>
+        <span style={{ fontSize: '12px', color: '#55606F' }}>Aguarde um momento</span>
+      </div>
+    </div>
+  )
+}
 
-        {errorMsg && (
-          <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px', textAlign: 'center' }}>
-            {errorMsg}
-          </p>
-        )}
+// 2. Proteção de Rota Rígida contra Dados Nulos
+function ProtectedRoute({ children }) {
+  const { session, loading } = useAuth()
 
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-            E-mail
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+  if (loading) {
+    return <LoadingFallback />
+  }
+
+  if (!session) {
+    return <Navigate to="/admin/login" replace />
+  }
+
+  return children
+}
+
+// 3. Fallback Visual para Rotas Desconhecidas (404)
+function NotFoundPage() {
+  return (
+    <div style={{ padding: '40px 20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+      <h2 style={{ color: '#0B1F3A' }}>Página não encontrada</h2>
+      <p style={{ color: '#55606F', fontSize: '14px' }}>O endereço acessado não existe ou mudou de local.</p>
+      <a 
+        href="/" 
+        style={{ 
+          display: 'inline-block', 
+          marginTop: '16px', 
+          padding: '10px 20px', 
+          backgroundColor: '#0B1F3A', 
+          color: '#fff', 
+          borderRadius: '6px',
+          textDecoration: 'none'
+        }}
+      >
+        Voltar para o Início
+      </a>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <div className="app-container">
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Rotas Públicas */}
+          <Route path="/" element={<Home />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          {/* Rotas Protegidas do Painel */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
           />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-            Senha
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+          <Route
+            path="/admin/estudos"
+            element={
+              <ProtectedRoute>
+                <AdminStudies />
+              </ProtectedRoute>
+            }
           />
-        </div>
+          <Route
+            path="/admin/agenda"
+            element={
+              <ProtectedRoute>
+                <AdminAgenda />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/avisos"
+            element={
+              <ProtectedRoute>
+                <AdminAnnouncements />
+              </ProtectedRoute>
+            }
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '12px',
-            backgroundColor: '#2563eb',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}
-        >
-          {loading ? 'Entrando...' : 'Entrar'}
-        </button>
-      </form>
+          {/* Captura qualquer rota desconhecida e impede a tela branca */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+
+      {/* Navegação Inferior PWA */}
+      <BottomNav />
     </div>
   )
 }
