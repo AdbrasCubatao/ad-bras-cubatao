@@ -2,10 +2,10 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import * as Icons from './icons.jsx'
 
-// Mapeamento dos ícones com fallback seguro
+// Mapeamento dos icones com fallback seguro
 const TABS = [
-  { to: '/', label: 'Início', Icon: Icons.HomeIcon || (() => <span>🏠</span>), end: true },
-  { to: '/biblia', label: 'Bíblia', Icon: Icons.BibleIcon || (() => <span>📖</span>) },
+  { to: '/', label: 'Inicio', Icon: Icons.HomeIcon || (() => <span>🏠</span>), end: true },
+  { to: '/bíblia', label: 'Bíblia', Icon: Icons.BibleIcon || (() => <span>📖</span>) },
   { to: '/agenda', label: 'Agenda', Icon: Icons.CalendarIcon || (() => <span>📅</span>) },
   { to: '/avisos', label: 'Avisos', Icon: Icons.MegaphoneIcon || (() => <span>📢</span>) },
   { to: '/mais', label: 'Mais', Icon: Icons.MoreIcon || (() => <span>⚙️</span>) },
