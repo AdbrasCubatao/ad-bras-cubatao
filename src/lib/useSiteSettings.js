@@ -1,28 +1,53 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './supabaseClient.js'
+import { useEffect, useState, useCallback } from 'react'
+import { supabase } from './supabase.js'
 
-// Busca a tabela `site_settings` (key/value) e devolve um objeto simples.
-// Usado para permitir que o admin sobrescreva textos/fotos padrão do app
-// sem precisar mexer no código.
 export function useSiteSettings() {
   const [settings, setSettings] = useState({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const loadSettings = useCallback(async (isMounted = true) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const { data, error: fetchError } = await supabase
+        .from('site_settings')
+        .select('key, value')
+
+      if (!isMounted) return
+
+      if (fetchError) {
+        throw fetchError
+      }
+
+      if (data) {
+        // Converte a lista de linhas [{key: 'logo_url', value: '...'}] em um objeto simples { logo_url: '...' }
+        const settingsMap = data.reduce((acc, row) => {
+          acc[row.key] = row.value
+          return acc
+        }, {})
+
+        setSettings(settingsMap)
+      }
+    } catch (err) {
+      console.error('Erro ao carregar configurações do site:', err)
+      if (isMounted) setError(err)
+    } finally {
+      if (isMounted) setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
-    async function load() {
-      const { data, error } = await supabase.from('site_settings').select('*')
-      if (!active) return
-      if (!error && data) {
-        const map = {}
-        data.forEach((row) => { map[row.key] = row.value })
-        setSettings(map)
-      }
-      setLoading(false)
-    }
-    load()
-    return () => { active = false }
-  }, [])
+    loadSettings(active)
 
-  return { settings, loading }
+    return () => {
+      active = false
+    }
+  }, [loadSettings])
+
+  return { settings, loading, error, refetch: () => loadSettings(true) }
 }
+
+export default useSiteSettings
