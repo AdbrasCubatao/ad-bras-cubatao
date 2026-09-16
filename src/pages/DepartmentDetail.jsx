@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import PageHeader from '../components/PageHeader.jsx'
 import { DEPARTMENTS } from '../lib/departments.js'
 
 function timeAgo(dateStr) {
+  if (!dateStr) return ''
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
   if (diff < 60) return 'agora há pouco'
   if (diff < 3600) return `${Math.floor(diff / 60)} min atrás`
@@ -23,18 +24,29 @@ export default function DepartmentDetail() {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
 
-  async function loadComments() {
+  const loadComments = useCallback(async () => {
     setLoading(true)
+    setError('')
     const { data, error: fetchError } = await supabase
       .from('comments')
       .select('*')
       .eq('department_slug', slug)
       .order('created_at', { ascending: false })
-    if (!fetchError) setComments(data ?? [])
-    setLoading(false)
-  }
 
-  useEffect(() => { loadComments() }, [slug])
+    if (fetchError) {
+      console.error('Erro ao buscar comentários:', fetchError)
+      setError('Não foi possível carregar os comentários.')
+    } else {
+      setComments(data ?? [])
+    }
+    setLoading(false)
+  }, [slug])
+
+  useEffect(() => {
+    if (department) {
+      loadComments()
+    }
+  }, [slug, department, loadComments])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -43,20 +55,34 @@ export default function DepartmentDetail() {
       setError('Escreva um comentário.')
       return
     }
+
     setSending(true)
-    const { error: insertError } = await supabase.from('comments').insert({
-      department_slug: slug,
-      name: name.trim() || 'Anônimo',
-      text: text.trim(),
-    })
+
+    // Insere e retorna o registro recém-criado (.select())
+    const { data: newComment, error: insertError } = await supabase
+      .from('comments')
+      .insert({
+        department_slug: slug,
+        name: name.trim() || 'Anônimo',
+        text: text.trim(),
+      })
+      .select()
+      .single()
+
     setSending(false)
+
     if (insertError) {
       setError('Não foi possível enviar agora. Tente novamente.')
       return
     }
+
+    // Atualiza o estado local inserindo o comentário direto no topo sem novo fetch
+    if (newComment) {
+      setComments((prev) => [newComment, ...prev])
+    }
+
     setName('')
     setText('')
-    loadComments()
   }
 
   if (!department) {
@@ -80,26 +106,42 @@ export default function DepartmentDetail() {
 
       <form className="card" onSubmit={handleSubmit}>
         <label htmlFor="name">Seu nome (opcional)</label>
-        <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: João" />
+        <input 
+          id="name" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)} 
+          placeholder="Ex: João" 
+        />
+
         <label htmlFor="text">Comentário</label>
-        <textarea id="text" rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="Deixe sua mensagem..." />
+        <textarea 
+          id="text" 
+          rows={3} 
+          value={text} 
+          onChange={(e) => setText(e.target.value)} 
+          placeholder="Deixe sua mensagem..." 
+        />
+
         {error && <p className="error-text">{error}</p>}
+
         <button className="btn-primary" type="submit" disabled={sending}>
           {sending ? 'Enviando...' : 'Comentar'}
         </button>
       </form>
 
       {loading && <p className="empty-state">Carregando comentários...</p>}
+
       {!loading && comments.length === 0 && (
         <p className="empty-state">Nenhum comentário ainda. Seja o primeiro!</p>
       )}
+
       {comments.length > 0 && (
         <div className="card">
           {comments.map((c) => (
             <div key={c.id} className="comment-item">
               <p className="comment-name">
                 {c.name}
-                <span className="comment-date">· {timeAgo(c.created_at)}</span>
+                <span className="comment-date"> · {timeAgo(c.created_at)}</span>
               </p>
               <p className="comment-text">{c.text}</p>
             </div>
