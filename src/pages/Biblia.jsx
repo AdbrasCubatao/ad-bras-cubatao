@@ -1,21 +1,16 @@
 import React from 'react';
 
 export default function Biblia() {
-  const abrirBiblia = () => {
-    // 1. Tenta abrir o app de Bíblia do celular (Ex: YouVersion)
-    const appUrl = 'youversion://'; 
-    // 2. Link de contingência para o navegador (Bíblia Online ARC)
-    const webUrl = 'https://www.bibliaonline.com.br/arc';
+  const webUrl = 'https://www.bibliaonline.com.br/arc';
+  const youversionUrl = 'https://www.bible.com/pt';
 
+  const abrirBiblia = () => {
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+    // Links web da YouVersion (bible.com) disparam automaticamente a intenção
+    // de abrir o aplicativo nativo se o usuário já o tiver instalado no celular.
     if (isMobile) {
-      window.location.href = appUrl;
-
-      // Se não abrir o app nativo em 1,5s, vai para o site
-      setTimeout(() => {
-        window.open(webUrl, '_blank', 'noopener,noreferrer');
-      }, 1500);
+      window.location.href = youversionUrl;
     } else {
       window.open(webUrl, '_blank', 'noopener,noreferrer');
     }
@@ -35,7 +30,7 @@ export default function Biblia() {
       <div style={{ fontSize: '64px', marginBottom: '16px' }}>📖</div>
       <h2 style={{ color: '#0056b3', marginBottom: '8px', fontSize: '24px' }}>Bíblia Sagrada</h2>
       <p style={{ color: '#666', marginBottom: '28px', maxWidth: '320px', lineHeight: '1.4' }}>
-        Acesse a Bíblia diretamente no seu aplicativo de preferência ou no navegador.
+        Acesse a Bíblia diretamente no seu aplicativo ou continue lendo no navegador.
       </p>
       
       <button
@@ -51,11 +46,26 @@ export default function Biblia() {
           cursor: 'pointer',
           boxShadow: '0 4px 12px rgba(0, 86, 179, 0.3)',
           width: '100%',
-          maxWidth: '280px'
+          maxWidth: '280px',
+          marginBottom: '12px'
         }}
       >
         Abrir Bíblia
       </button>
+
+      <a
+        href={webUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          fontSize: '14px',
+          color: '#0056b3',
+          textDecoration: 'none',
+          fontWeight: '500'
+        }}
+      >
+        Ler no navegador (Bíblia Online)
+      </a>
     </div>
   );
 }
