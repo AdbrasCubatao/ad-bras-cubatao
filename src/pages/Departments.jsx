@@ -123,15 +123,16 @@ export default function Departments() {
   ]
 
   const conectarWhatsapp = (nomeDep) => {
+    // Substitua pelo número real da liderança ou secretaria da igreja
+    const numeroWhatsapp = '5513999999999'
     const mensagem = encodeURIComponent(`Paz do Senhor! Vi a página do departamento ${nomeDep} no app e gostaria de mais informações.`)
-    window.open(`https://wa.me/5513999999999?text=${mensagem}`, '_blank')
+    window.open(`https://wa.me/${numeroWhatsapp}?text=${mensagem}`, '_blank')
   }
 
   // --- TELA 2: PÁGINA DO DEPARTAMENTO SELECIONADO ---
   if (depSelecionado) {
     const postsFiltrados = depSelecionado.posts.filter(p => abaAtiva === 'todos' || p.categoria === abaAtiva)
 
-    // Título customizado com foto do líder ao lado
     const TituloComFoto = (
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img
@@ -180,10 +181,10 @@ export default function Departments() {
           ← Voltar aos Departamentos
         </button>
 
-        {/* Menu Superior de Ícones / Filtros */}
+        {/* Menu Superior de Filtros */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justify: 'space-between',
           backgroundColor: '#0a192f',
           borderRadius: '16px',
           padding: '10px 6px',
@@ -321,4 +322,4 @@ export default function Departments() {
       </div>
     </SimplePage>
   )
-            }
+}
