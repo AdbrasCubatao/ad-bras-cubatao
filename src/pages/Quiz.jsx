@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 import PageHeader from '../components/PageHeader.jsx'
 
-// Perguntas de fallback, usadas se a tabela `quiz_questions` estiver vazia
-// ou o Supabase ainda não estiver configurado.
 const FALLBACK_QUESTIONS = [
   {
     id: 'f1',
@@ -25,7 +23,6 @@ const FALLBACK_QUESTIONS = [
   },
 ]
 
-// Quantas perguntas entram em cada partida (sorteadas entre todas cadastradas).
 const QUESTIONS_PER_ROUND = 10
 
 function shuffle(array) {
@@ -51,7 +48,7 @@ export default function Quiz() {
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  async function loadLeaderboard() {
+  const loadLeaderboard = useCallback(async () => {
     setLeaderboardLoading(true)
     const { data, error } = await supabase
       .from('quiz_scores')
@@ -59,30 +56,32 @@ export default function Quiz() {
       .order('score', { ascending: false })
       .order('created_at', { ascending: true })
       .limit(10)
+
     if (!error) setLeaderboard(data ?? [])
     setLeaderboardLoading(false)
-  }
+  }, [])
 
-  async function startRound() {
+  const startRound = useCallback(async () => {
     setLoading(true)
     const { data, error } = await supabase
       .from('quiz_questions')
       .select('*')
       .order('created_at', { ascending: true })
+
     const pool = !error && data && data.length > 0 ? data : FALLBACK_QUESTIONS
     setQuestions(shuffle(pool).slice(0, QUESTIONS_PER_ROUND))
     setLoading(false)
-  }
+  }, [])
 
   useEffect(() => {
     startRound()
     loadLeaderboard()
-  }, [])
+  }, [startRound, loadLeaderboard])
 
   function handleAnswer(index) {
     if (selected !== null) return
     setSelected(index)
-    if (index === questions[step].correct_index) setScore((s) => s + 1)
+    if (index === questions[step]?.correct_index) setScore((s) => s + 1)
   }
 
   function next() {
@@ -108,11 +107,13 @@ export default function Quiz() {
     e.preventDefault()
     if (!playerName.trim()) return
     setSaving(true)
+
     const { error } = await supabase.from('quiz_scores').insert({
       name: playerName.trim(),
       score,
       total_questions: questions.length,
     })
+
     setSaving(false)
     if (!error) {
       setSaved(true)
@@ -167,24 +168,30 @@ export default function Quiz() {
   }
 
   const q = questions[step]
+  const options = Array.isArray(q?.options) ? q.options : []
 
   return (
     <div className="page">
       <PageHeader title="Quiz Bíblico" subtitle={`Pergunta ${step + 1} de ${questions.length}`} />
       <div className="card">
-        <p className="comment-name" style={{ fontSize: 15, marginBottom: 14 }}>{q.question}</p>
-        {q.options.map((opt, i) => {
+        <p className="comment-name" style={{ fontSize: 15, marginBottom: 14 }}>
+          {q?.question}
+        </p>
+
+        {options.map((opt, i) => {
           let cls = 'quiz-option'
           if (selected !== null) {
             if (i === q.correct_index) cls += ' correct'
             else if (i === selected) cls += ' wrong'
           }
+
           return (
             <button key={i} className={cls} onClick={() => handleAnswer(i)}>
               {opt}
             </button>
           )
         })}
+
         {selected !== null && (
           <button className="btn-primary" onClick={next}>
             {step + 1 < questions.length ? 'Próxima pergunta' : 'Ver resultado'}
@@ -210,7 +217,7 @@ function Leaderboard({ loading, items }) {
       {items.length > 0 && (
         <div className="card">
           {items.map((r, i) => (
-            <div key={r.id} className="comment-item" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div key={r.id || i} className="comment-item" style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="comment-name">{i + 1}. {r.name}</span>
               <span className="pill" style={{ margin: 0 }}>{r.score}/{r.total_questions}</span>
             </div>
